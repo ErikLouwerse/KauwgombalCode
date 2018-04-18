@@ -15,7 +15,7 @@ import javax.swing.JTextField;
 
 /**
  *
- * @author erikl
+ * @author erikl & Martijn
  */
 public class GUI extends JFrame implements ActionListener {
 
