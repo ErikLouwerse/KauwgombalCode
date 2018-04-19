@@ -15,16 +15,16 @@ import javax.swing.JTextField;
 
 /**
  *
- * @author erikl & Martijn
+ * @author erikl
  */
 public class GUI extends JFrame implements ActionListener {
 
-    private SerialTest SerialTest;
+    private Communicator SerialTest;
     private JButton jbSpeedUp;
     private JButton jbSlowDown;
     private JLabel jlCurrentSpeed;
 
-    public GUI(SerialTest SerialTest) {
+    GUI(Communicator SerialTest) {
         
         setTitle("GUI");
         setSize(300, 200);

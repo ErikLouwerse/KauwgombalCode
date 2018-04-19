@@ -16,7 +16,7 @@ public class Communicator implements SerialPortEventListener {
     /**
      * The port we're normally going to use.
      */
-    private static final String PORT_NAMES[] = {
+    private String PORT_NAMES[] = {
         "COM0",
         "COM1",
         "COM2",
@@ -40,13 +40,13 @@ public class Communicator implements SerialPortEventListener {
     /**
      * Milliseconds to block while waiting for port open
      */
-    private static final int TIME_OUT = 2000;
+    private int TIME_OUT = 2000;
     /**
      * Default bits per second for COM port.
      */
-    private static final int DATA_RATE = 9600;
+    private int DATA_RATE = 9600;
 
-    public void initialize() {
+    void initialize() {
 
         CommPortIdentifier portId = null;
         Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();
@@ -90,21 +90,10 @@ public class Communicator implements SerialPortEventListener {
     }
 
     /**
-     * This should be called when you stop using the port. This will prevent
-     * port locking on platforms like Linux.
-     */
-    public synchronized void close() {
-        if (serialPort != null) {
-            serialPort.removeEventListener();
-            serialPort.close();
-        }
-    }
-
-    /**
      * Handle an event on the serial port. Read the data and print it.
      */
     @Override
-    public synchronized void serialEvent(SerialPortEvent oEvent) {
+    public void serialEvent(SerialPortEvent oEvent) {
         if (oEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
             try {
                 String inputLine = input.readLine();
@@ -113,37 +102,19 @@ public class Communicator implements SerialPortEventListener {
             }
 
         }
-        // Ignore all the other eventTypes, but you should consider the other ones.
     }
 
-    public synchronized void SpeedUp() {
+    void SpeedUp() {
         try {
             output.write(1);
         } catch (IOException e) {
         }
     }
     
-    public synchronized void SlowDown() {
+    void SlowDown() {
         try {
             output.write(2);
         } catch (IOException e) {
         }
-    }
-
-    public static void main(String[] args) throws Exception {
-        Communicator main = new Communicator();
-        main.initialize();
-        Thread t = new Thread() {
-            public void run() {
-                //the following line will keep this app alive for 1000 seconds,
-                //waiting for events to occur and responding to them (printing incoming messages to console).
-                try {
-                    Thread.sleep(10000);
-                } catch (InterruptedException ie) {
-                }
-            }
-        };
-        t.start();
-        System.out.println("Started");
     }
 }

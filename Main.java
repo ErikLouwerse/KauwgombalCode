@@ -18,7 +18,7 @@ import javax.swing.JFrame;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        SerialTest main = new SerialTest();
+        Communicator main = new Communicator();
         main.initialize();
         Thread t = new Thread() {
             public void run() {
