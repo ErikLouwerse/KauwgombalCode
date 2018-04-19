@@ -10,7 +10,7 @@ import gnu.io.SerialPortEventListener;
 import java.io.IOException;
 import java.util.Enumeration;
 
-public class SerialTest implements SerialPortEventListener {
+public class Communicator implements SerialPortEventListener {
 
     SerialPort serialPort;
     /**
@@ -131,7 +131,7 @@ public class SerialTest implements SerialPortEventListener {
     }
 
     public static void main(String[] args) throws Exception {
-        SerialTest main = new SerialTest();
+        Communicator main = new Communicator();
         main.initialize();
         Thread t = new Thread() {
             public void run() {
