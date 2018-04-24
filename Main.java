@@ -18,8 +18,12 @@ import javax.swing.JFrame;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        Communicator main = new Communicator();
-        main.initialize();
+        Communicator1 Communicator1 = new Communicator1();
+        Communicator2 Communicator2 = new Communicator2();
+        
+        Communicator1.initialize();
+        Communicator2.initialize();
+        
         Thread t = new Thread() {
             public void run() {
                 //the following line will keep this app alive for 1000 seconds,
@@ -31,9 +35,8 @@ public class Main {
             }
         };
         t.start();
-        System.out.println("Started");
         
-        GUI gui = new GUI(main);
+        GUI gui = new GUI(Communicator1, Communicator2);
         gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 }

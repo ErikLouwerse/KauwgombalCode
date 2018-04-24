@@ -1,5 +1,6 @@
 package javaarduino;
 
+import java.sql.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -10,23 +11,14 @@ import gnu.io.SerialPortEventListener;
 import java.io.IOException;
 import java.util.Enumeration;
 
-public class Communicator implements SerialPortEventListener {
+public class Communicator2 implements SerialPortEventListener {
 
     SerialPort serialPort;
     /**
      * The port we're normally going to use.
      */
     private String PORT_NAMES[] = {
-        "COM0",
-        "COM1",
-        "COM2",
-        "COM3",
-        "COM4",
-        "COM5",
-        "COM6",
-        "COM7",
-        "COM8",
-        "COM9"
+        "COM6"
     };
     /**
      * A BufferedReader which will be fed by a InputStreamReader converting the
@@ -103,18 +95,40 @@ public class Communicator implements SerialPortEventListener {
 
         }
     }
-
-    void SpeedUp() {
+    
+    void YellowBalls(int i){
         try {
-            output.write(1);
+            output.write(i);
         } catch (IOException e) {
         }
     }
     
-    void SlowDown() {
+    void RedBalls(int i){
         try {
-            output.write(2);
+            output.write(i);
         } catch (IOException e) {
         }
     }
+    
+    void GreenBalls(int i){
+        try {
+            output.write(i);
+        } catch (IOException e) {
+        }
+    }
+    
+    void Blueballs(int i){
+        try {
+            output.write(i);
+        } catch (IOException e) {
+        }
+    }
+    
+    void QuantityPackage(int i){
+        try {
+            output.write(i);
+        } catch (IOException e) {
+        }
+    }
+
 }
