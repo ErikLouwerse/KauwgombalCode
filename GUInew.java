@@ -28,8 +28,10 @@ public class GUInew extends Application {
 
     private GridPane root, left, right, quantities, buttonpane;
     private VBox vboxleft, vboxright;
-    private Label settingstext, speedlabel, yellowballlabel, redballlabel, greenballlabel, blueballlabel, packageslabel;
+    private Label settingstext, speedlabel, yellowballlabel, redballlabel, greenballlabel, blueballlabel, packageslabel,
+            statuslabel, loglabel;
     private TextField yellowballfield, redballfield, greenballfield, blueballfield, packagesfield;
+    private TextArea logboek;
     private Line blackLine;
     private CheckBox dispose;
     private Slider slider;
@@ -60,6 +62,7 @@ public class GUInew extends Application {
         vboxleft = new VBox(25);
         vboxleft.setPadding(new Insets(10));
         vboxleft.prefHeightProperty().bind(window.heightProperty().multiply(1.00));
+        vboxleft.prefWidthProperty().bind(window.widthProperty().multiply(1.00));
 
         settingstext = new Label("Settings");
         settingstext.setFont(Font.font(Font.getDefault().getFamily(), FontWeight.BOLD, 18));
@@ -128,20 +131,30 @@ public class GUInew extends Application {
         //=============================== END LEFT =====================================
 
         //=============================== START RIGHT ==================================
-        vboxright = new VBox(15);
-        vboxright.setPadding(new Insets(10));
-        vboxright.prefHeightProperty().bind(window.heightProperty().multiply(1.00));
+        vboxright = new VBox(10);
+        vboxright.setPadding(new Insets(0));
+        //vboxright.prefHeightProperty().bind(window.heightProperty().multiply(1.00));
+        //vboxright.prefWidthProperty().bind(window.widthProperty().multiply(1.00));
 
-        Canvas canvas = new Canvas(400, 400);
+        statuslabel = new Label("Huidige status:");
+
+        Canvas canvas = new Canvas(1500, 500);
         StackPane holder = new StackPane();
+        //canvas.widthProperty().bind(window.widthProperty().multiply(0.8));
+        //canvas.heightProperty().bind(window.heightProperty().multiply(1).subtract(50));
         holder.getChildren().add(canvas);
         holder.setStyle("-fx-background-color: white");
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.fillOval(20,20,50,50);
 
+        loglabel = new Label("Logboek:");
+
+        logboek = new TextArea("");
+        logboek.setEditable(false);
+
         //TODO: Log deel en button deel toevoegen
 
-        vboxright.getChildren().addAll(holder);
+        vboxright.getChildren().addAll(statuslabel, holder, loglabel, logboek);
         right.getChildren().addAll(vboxright);
         //=============================== END LEFT =====================================
 
@@ -171,33 +184,53 @@ public class GUInew extends Application {
                     if (yellowcount < 0 || yellowcount > 99 || redcount < 0 || redcount > 99 || greencount < 0 || greencount > 99
                             || bluecount < 0 || bluecount > 99 || quantitycount < 0 || quantitycount > 99) {
                         //Dialog with warning will be showed
-                        showWarning("Waarschuwing", "Er is een fout opgetreden!",
+                        showWarning("Er is een fout opgetreden!",
                                 "Een of meerdere van de ingevulde hoeveelheden is kleiner dan 0 of groter dan 99. Verbeter dit.");
                     }
                     else {
                         //TODO: sla op in Database
                         System.out.println(disposevalue + " " + speedvalue + " " + yellowcount + " " + redcount
                                 + " " + greencount + " " + bluecount + " " + quantitycount);
+                        showInfo("Opgeslagen", "De instellingen zijn succesvol opgeslagen!");
                     }
                 } catch (NumberFormatException e) {
                     //Dialog with warning will be showed
-                    showWarning("Waarschuwing", "Er is een fout opgetreden!",
+                    showWarning("Er is een fout opgetreden!",
                             "Een of meerdere van de instellingen was leeg of bevat niet-numerieke tekst. Verbeter dit.");
                 }
             }
             else if (event.getSource() == revertbutton) {
                 System.out.println("Reverting settings...");
+                boolean dbdispose = false;
+                double dbslider = 2.0;
+                int dbyellow = 0, dbred = 0, dbgreen = 0, dbblue = 0, dbpackages = 0;
                 //TODO: haal oude gegevens uit de Database op en stel ze terug in
+                dispose.setSelected(dbdispose);
+                slider.setValue(dbslider);
+                yellowballfield.setText(String.valueOf(dbyellow));
+                redballfield.setText(String.valueOf(dbred));
+                greenballfield.setText(String.valueOf(dbgreen));
+                blueballfield.setText(String.valueOf(dbblue));
+                packagesfield.setText(String.valueOf(dbpackages));
+                showInfo("Instellingen teruggezet", "De vorige instellingen zijn teruggezet.");
                 System.out.println("Settings reverted!");
             }
         }
 
-        private void showWarning(String title, String header, String text) {
+        private void showWarning(String header, String text) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle(title);
+            alert.setTitle("Waarschuwing!");
             alert.setHeaderText(header);
             alert.setContentText(text);
             alert.showAndWait();
+        }
+
+        private void showInfo(String header, String text) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Informatie");
+            alert.setHeaderText(header);
+            alert.setContentText(text);
+            alert.show();
         }
     }
 
