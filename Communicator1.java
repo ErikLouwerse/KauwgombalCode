@@ -1,6 +1,5 @@
 package javaarduino;
 
-import java.sql.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -12,7 +11,7 @@ import java.io.IOException;
 import java.util.Enumeration;
 
 public class Communicator1 implements SerialPortEventListener {
-
+    
     SerialPort serialPort;
     /**
      * The port we're normally going to use.
@@ -93,20 +92,6 @@ public class Communicator1 implements SerialPortEventListener {
             } catch (IOException e) {
             }
 
-        }
-    }
-
-    void SpeedUp() {
-        try {
-            output.write(1);
-        } catch (IOException e) {
-        }
-    }
-
-    void SlowDown() {
-        try {
-            output.write(2);
-        } catch (IOException e) {
         }
     }
 
