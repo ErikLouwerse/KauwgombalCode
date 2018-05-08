@@ -112,7 +112,7 @@ public class GUI extends JFrame implements ActionListener {
                 Communicator2.GreenBalls(GreenAmount);
                 Communicator2.Blueballs(BlueAmount);
                 Communicator2.QuantityPackage(QuantityAmount);
-                Database.PrepQuery("INSERT INTO `Logboek` (`Transactienummer`, `Geel`, `Rood`, `Groen`, `Blauw`, `Aantal pakketten`) SELECT MAX(Transactienummer)+1,?,?,?,?,? FROM Logboek", YellowAmount, RedAmount, GreenAmount, BlueAmount, QuantityAmount);
+                Database.PrepQuery("INSERT INTO `transacties` (`Transactienummer`, `Geel`, `Rood`, `Groen`, `Blauw`, `Aantal pakketten`) SELECT MAX(Transactienummer)+1,?,?,?,?,? FROM transacties", YellowAmount, RedAmount, GreenAmount, BlueAmount, QuantityAmount);
             } catch (NumberFormatException a) {
                 System.out.println(a);
             }

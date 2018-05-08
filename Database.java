@@ -20,7 +20,7 @@ public class Database {
 
     static void Query(String Query) {
         try {
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/kauwgombaldb?serverTimezone=UTC", "root", "");
+            Connection con = DriverManager.getConnection("jdbc:mysql://104.199.31.189:3306/kauwgombal?useSSL=false", "root", "1424bb@12");
             Statement stmt = con.createStatement();
             stmt.execute(Query);
         } catch (SQLException e) {
@@ -30,7 +30,7 @@ public class Database {
 
     static void PrepQuery(String Query, int Variable, int Variable2, int Variable3, int Variable4, int Variable5) {
         try {
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/kauwgombaldb?serverTimezone=UTC", "root", "");
+            Connection con = DriverManager.getConnection("jdbc:mysql://104.199.31.189:3306/kauwgombal?useSSL=false", "root", "1424bb@12");
             PreparedStatement s = con.prepareStatement(Query);
             s.setInt(1, Variable);
             s.setInt(2, Variable2);
@@ -38,7 +38,6 @@ public class Database {
             s.setInt(4, Variable4);
             s.setInt(5, Variable5);
             s.executeUpdate();
-            con.commit();
         } catch (SQLException e) {
             System.out.println(e);
         }

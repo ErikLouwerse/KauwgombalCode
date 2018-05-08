@@ -1,4 +1,4 @@
-package gitcode;
+package javaarduino;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -19,9 +19,29 @@ import javafx.scene.shape.LineBuilder;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import javax.swing.JCheckBox;
 
 public class GUInew extends Application {
-    public static void main(final String[] args) {
+
+    public static void main(String[] args) throws Exception {
+        Communicator1 Communicator1 = new Communicator1();
+        Communicator2 Communicator2 = new Communicator2();
+
+        Communicator1.initialize();
+        Communicator2.initialize();
+
+        Thread t = new Thread() {
+            public void run() {
+                //the following line will keep this app alive for 1000 seconds,
+                //waiting for events to occur and responding to them (printing incoming messages to console).
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException ie) {
+                }
+            }
+        };
+        t.start();
+        //gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         launch(args);
     }
 
@@ -36,6 +56,10 @@ public class GUInew extends Application {
     private Slider slider;
     private Button savebutton, revertbutton;
     private GUIbuttonListener listener;
+    private boolean OtherColorChecked = false;
+    private Communicator1 Communicator1;
+    private Communicator2 Communicator2;
+    private Database Database;
 
     @Override
     public void start(final Stage window) {
@@ -48,13 +72,13 @@ public class GUInew extends Application {
         left.setStyle("-fx-border-color: black; -fx-border-insets: 0; -fx-border-width: 1;");
         left.prefHeightProperty().bind(window.heightProperty().multiply(1.00));
         left.prefWidthProperty().bind(window.widthProperty().multiply(0.20));
-        root.add(left,0,0);
+        root.add(left, 0, 0);
 
         right = new GridPane();
         //right.setVgap(10);
         right.prefHeightProperty().bind(window.heightProperty().multiply(1.00));
         right.prefWidthProperty().bind(window.widthProperty().multiply(0.80));
-        root.add(right,1,0);
+        root.add(right, 1, 0);
         //================= END Create root, left and right ================
 
         //=============================== START LEFT ==================================
@@ -70,7 +94,14 @@ public class GUInew extends Application {
                 .endY(0).fill(Color.BLACK).strokeWidth(2.0f).translateY(-10).build();
         blackLine.endXProperty().bind(window.widthProperty().multiply(0.175));
 
-        dispose = new CheckBox("Dispose unnecessary balls");
+        if (OtherColorChecked == true) {
+            dispose = new CheckBox("Dispose unnecessary balls");
+            dispose.setOnAction(listener);
+        } else {
+            dispose = new CheckBox("Dispose unnecessary balls");
+            dispose.setOnAction(listener);
+        }
+        dispose.setSelected(OtherColorChecked);
 
         speedlabel = new Label("Speed:");
 
@@ -103,7 +134,7 @@ public class GUInew extends Application {
         col1.setPercentWidth(80);
         ColumnConstraints col2 = new ColumnConstraints();
         col2.setPercentWidth(20);
-        quantities.getColumnConstraints().addAll(col1,col2);
+        quantities.getColumnConstraints().addAll(col1, col2);
         quantities.addColumn(0, yellowballlabel, redballlabel, greenballlabel, blueballlabel, packageslabel);
         quantities.addColumn(1, yellowballfield, redballfield, greenballfield, blueballfield, packagesfield);
 
@@ -121,7 +152,7 @@ public class GUInew extends Application {
         butcol1.setPercentWidth(50);
         ColumnConstraints butcol2 = new ColumnConstraints();
         butcol2.setPercentWidth(50);
-        buttonpane.getColumnConstraints().addAll(butcol1,butcol2);
+        buttonpane.getColumnConstraints().addAll(butcol1, butcol2);
         buttonpane.addColumn(0, savebutton);
         buttonpane.addColumn(1, revertbutton);
 
@@ -144,7 +175,7 @@ public class GUInew extends Application {
         holder.getChildren().add(canvas);
         holder.setStyle("-fx-background-color: white");
         GraphicsContext gc = canvas.getGraphicsContext2D();
-        gc.fillOval(20,20,50,50);
+        gc.fillOval(20, 20, 50, 50);
 
         loglabel = new Label("Logboek:");
 
@@ -152,7 +183,6 @@ public class GUInew extends Application {
         logarea.setEditable(false);
 
         //TODO: Log deel en button deel toevoegen
-
         vboxright.getChildren().addAll(statuslabel, holder, loglabel, logarea);
         right.getChildren().addAll(vboxright);
         //=============================== END LEFT =====================================
@@ -168,12 +198,30 @@ public class GUInew extends Application {
         return logarea;
     }
 
-
     //============================== INTERNAL CLASSES ======================================
     private class GUIbuttonListener implements EventHandler<ActionEvent> {
+
         @Override
         public void handle(ActionEvent event) {
-            if (event.getSource() == savebutton) {
+            if (event.getSource() == dispose) {
+                if (OtherColorChecked == true) {
+                    OtherColorChecked = false;
+                    try {
+                        Communicator1.ColorDisposeOff();
+                    } catch (Exception e) {
+                        System.out.println("Geen connectie met arduino");
+                    }
+                    Database.Query("UPDATE `settings` SET `Waarde`= 0 WHERE `Naam` = 'Afvoeren'");
+                } else if (OtherColorChecked == false) {
+                    OtherColorChecked = true;
+                    try {
+                        Communicator1.ColorDisposeOn();
+                    } catch (Exception e) {
+                        System.out.println("Geen connectie met arduino");
+                    }
+                    Database.Query("UPDATE `settings` SET `Waarde`= 1 WHERE `Naam` = 'Afvoeren'");
+                }
+            } else if (event.getSource() == savebutton) {
                 //Pressed button was the save button, so get all setting values
                 boolean disposevalue = dispose.isSelected();
                 double speedvalue = slider.getValue();
@@ -191,8 +239,17 @@ public class GUInew extends Application {
                         //Dialog with warning will be showed
                         showWarning("Er is een fout opgetreden!",
                                 "Een of meerdere van de ingevulde hoeveelheden is kleiner dan 0 of groter dan 99. Verbeter dit.");
-                    }
-                    else {
+                    } else {
+                        try {
+                            Communicator2.YellowBalls(yellowcount);
+                            Communicator2.RedBalls(redcount);
+                            Communicator2.GreenBalls(greencount);
+                            Communicator2.Blueballs(bluecount);
+                            Communicator2.QuantityPackage(quantitycount);
+                        } catch (Exception e){
+                            System.out.println("Geen verbinding met arduino");
+                        }
+                        Database.PrepQuery("INSERT INTO `transacties` (`Transactienummer`, `Geel`, `Rood`, `Groen`, `Blauw`, `Aantal pakketten`) SELECT MAX(Transactienummer)+1,?,?,?,?,? FROM transacties", yellowcount, redcount, greencount, bluecount, quantitycount);
                         Logboek.addRule(System.currentTimeMillis(), "Saving settings...");
                         Logboek.addRule(System.currentTimeMillis(), "Values are: " + disposevalue + " " + speedvalue + " " + yellowcount
                                 + " " + redcount + " " + greencount + " " + bluecount + " " + quantitycount);
@@ -205,8 +262,7 @@ public class GUInew extends Application {
                     showWarning("Er is een fout opgetreden!",
                             "Een of meerdere van de instellingen was leeg of bevat niet-numerieke tekst. Verbeter dit.");
                 }
-            }
-            else if (event.getSource() == revertbutton) {
+            } else if (event.getSource() == revertbutton) {
                 Logboek.addRule(System.currentTimeMillis(), "Reverting settings...");
                 boolean dbdispose = false;
                 double dbslider = 2.0;
@@ -242,6 +298,7 @@ public class GUInew extends Application {
     }
 
     private class ResizableCanvas extends Canvas {
+
         public ResizableCanvas() {
             // Redraw canvas when size changes.
             widthProperty().addListener(evt -> draw());
