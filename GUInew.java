@@ -1,4 +1,4 @@
-package sample;
+package gitcode;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -14,7 +14,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.ArcType;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.LineBuilder;
 import javafx.scene.text.Font;
@@ -31,7 +30,7 @@ public class GUInew extends Application {
     private Label settingstext, speedlabel, yellowballlabel, redballlabel, greenballlabel, blueballlabel, packageslabel,
             statuslabel, loglabel;
     private TextField yellowballfield, redballfield, greenballfield, blueballfield, packagesfield;
-    private TextArea logboek;
+    private static TextArea logarea;
     private Line blackLine;
     private CheckBox dispose;
     private Slider slider;
@@ -40,7 +39,7 @@ public class GUInew extends Application {
 
     @Override
     public void start(final Stage window) {
-        this.listener = new GUIbuttonListener();
+        listener = new GUIbuttonListener();
         //=============== START Create root, left and right ================
         root = new GridPane();
         root.setHgap(10);
@@ -149,12 +148,12 @@ public class GUInew extends Application {
 
         loglabel = new Label("Logboek:");
 
-        logboek = new TextArea("");
-        logboek.setEditable(false);
+        logarea = new TextArea("");
+        logarea.setEditable(false);
 
         //TODO: Log deel en button deel toevoegen
 
-        vboxright.getChildren().addAll(statuslabel, holder, loglabel, logboek);
+        vboxright.getChildren().addAll(statuslabel, holder, loglabel, logarea);
         right.getChildren().addAll(vboxright);
         //=============================== END LEFT =====================================
 
@@ -165,6 +164,12 @@ public class GUInew extends Application {
         window.show();
     }
 
+    public static TextArea getLogarea() {
+        return logarea;
+    }
+
+
+    //============================== INTERNAL CLASSES ======================================
     private class GUIbuttonListener implements EventHandler<ActionEvent> {
         @Override
         public void handle(ActionEvent event) {
@@ -188,9 +193,11 @@ public class GUInew extends Application {
                                 "Een of meerdere van de ingevulde hoeveelheden is kleiner dan 0 of groter dan 99. Verbeter dit.");
                     }
                     else {
+                        Logboek.addRule(System.currentTimeMillis(), "Saving settings...");
+                        Logboek.addRule(System.currentTimeMillis(), "Values are: " + disposevalue + " " + speedvalue + " " + yellowcount
+                                + " " + redcount + " " + greencount + " " + bluecount + " " + quantitycount);
                         //TODO: sla op in Database
-                        System.out.println(disposevalue + " " + speedvalue + " " + yellowcount + " " + redcount
-                                + " " + greencount + " " + bluecount + " " + quantitycount);
+                        Logboek.addRule(System.currentTimeMillis(), "Settings saved successfully");
                         showInfo("Opgeslagen", "De instellingen zijn succesvol opgeslagen!");
                     }
                 } catch (NumberFormatException e) {
@@ -200,7 +207,7 @@ public class GUInew extends Application {
                 }
             }
             else if (event.getSource() == revertbutton) {
-                System.out.println("Reverting settings...");
+                Logboek.addRule(System.currentTimeMillis(), "Reverting settings...");
                 boolean dbdispose = false;
                 double dbslider = 2.0;
                 int dbyellow = 0, dbred = 0, dbgreen = 0, dbblue = 0, dbpackages = 0;
@@ -213,7 +220,7 @@ public class GUInew extends Application {
                 blueballfield.setText(String.valueOf(dbblue));
                 packagesfield.setText(String.valueOf(dbpackages));
                 showInfo("Instellingen teruggezet", "De vorige instellingen zijn teruggezet.");
-                System.out.println("Settings reverted!");
+                Logboek.addRule(System.currentTimeMillis(), "Settings reverted");
             }
         }
 
