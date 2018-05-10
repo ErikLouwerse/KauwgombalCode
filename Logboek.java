@@ -13,14 +13,19 @@ public class Logboek {
         return sdf.format(resultdate);
     }
 
-    public static void addRule(long time, String text) {
+    static void addRule(long time, String text) {
         String addme = "[" + convertTime(time) + "] " + text;
         logrules.add(addme);
-        Database.PrepQueryLogboek(time, text);
         GUInew.getLogarea().appendText(addme + "\n");
+        try {
+            Database.PrepQueryLogbook(time, text);
+        } catch (Exception e) {
+            GUInew.getLogarea().appendText("ERROR: Database error, program can't function.\n");
+            GUInew.showError("Fatale fout opgetreden!", "Er kon geen connectie met de Database gemaakt worden. Het programma kan zo niet functioneren.");
+        }
     }
 
-    public static void printAll() {
+    static void printAll() {
         for(int i=0; i<logrules.size(); i++) {
             GUInew.getLogarea().appendText(logrules.get(i));
         }

@@ -18,6 +18,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
+import java.util.List;
+
 public class GUInew extends Application {
 
     private static Communicator1 Communicator1;
@@ -187,6 +189,30 @@ public class GUInew extends Application {
         return logarea;
     }
 
+    static void showInfo(String header, String text) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Informatie");
+        alert.setHeaderText(header);
+        alert.setContentText(text);
+        alert.show();
+    }
+
+    static void showWarning(String header, String text) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Waarschuwing!");
+        alert.setHeaderText(header);
+        alert.setContentText(text);
+        alert.showAndWait();
+    }
+
+    static void showError(String header, String text) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("FOUT!");
+        alert.setHeaderText(header);
+        alert.setContentText(text);
+        alert.showAndWait();
+    }
+
     //============================== EVENT LISTENER CLASS ======================================
     private class GUIbuttonListener implements EventHandler<ActionEvent> {
 
@@ -196,7 +222,7 @@ public class GUInew extends Application {
                 //Save button was pressed
                 Logboek.addRule(System.currentTimeMillis(), "Saving settings...");
                 boolean disposevalue = dispose.isSelected();
-                double speedvalue = slider.getValue();
+                int speedvalue = (int) slider.getValue();
                 int yellowcount = -1, redcount = -1, greencount = -1, bluecount = -1, quantitycount = -1;
                 try {
                     yellowcount = Integer.parseInt(yellowballfield.getText());
@@ -208,12 +234,12 @@ public class GUInew extends Application {
                     //Check if the input quantities meet the requirements: minimal 0 && maximal 99.
                     if (yellowcount < 0 || yellowcount > 99 || redcount < 0 || redcount > 99 || greencount < 0 || greencount > 99
                             || bluecount < 0 || bluecount > 99 || quantitycount < 0 || quantitycount > 99) {
-                        Logboek.addRule(System.currentTimeMillis(), "ERROR: one or more of the values are invalid (<0 or >99)");
+                        Logboek.addRule(System.currentTimeMillis(), "WARNING: one or more of the values are invalid (<0 or >99)");
                         showWarning("Er is een fout opgetreden!",
                                 "Een of meerdere van de ingevulde hoeveelheden is kleiner dan 0 of groter dan 99. Verbeter dit.");
                     } else {
                         try {
-                            Logboek.addRule(System.currentTimeMillis(), "Sending Quantities to Arduino2");
+                            Logboek.addRule(System.currentTimeMillis(), "Sending quantities to Arduino2");
                             Communicator2.YellowBalls(yellowcount);
                             Communicator2.RedBalls(redcount);
                             Communicator2.GreenBalls(greencount);
@@ -222,21 +248,21 @@ public class GUInew extends Application {
                             Logboek.addRule(System.currentTimeMillis(), "Quantities successfully sent to Arduino2");
                         } catch (Exception e){
                             Logboek.addRule(System.currentTimeMillis(), "ERROR: No connection with Arduino2!");
-                            showWarning("Fout tijdens opslaan", "De instellingen konden niet op de Arduino opgeslagen worden! Probeer het opnieuw.");
+                            showError("Fout tijdens opslaan", "De instellingen konden niet op de Arduino opgeslagen worden! Probeer het opnieuw.");
                         }
-                        Logboek.addRule(System.currentTimeMillis(), "Saving settings to Database");
                         try {
-                            Database.PrepQuery("INSERT INTO `transacties` (`Transactienummer`, `Geel`, `Rood`, `Groen`, `Blauw`, `Aantal pakketten`) " +
-                                    "SELECT MAX(Transactienummer)+1,?,?,?,?,? FROM transacties", yellowcount, redcount, greencount, bluecount, quantitycount);
-                            Logboek.addRule(System.currentTimeMillis(), "Settings saved");
-                            showInfo("Opgeslagen", "De instellingen zijn succesvol opgeslagen!");
+                            Logboek.addRule(System.currentTimeMillis(), "Saving settings to Database");
+                            Database.PrepQuery("INSERT INTO `transacties` (`Transactienummer`, `Geel`, `Rood`, `Groen`, `Blauw`, `Aantal pakketten`, `Afvoeren`, `Snelheid`) " +
+                                    "SELECT MAX(Transactienummer)+1,?,?,?,?,?,?,? FROM transacties", yellowcount, redcount, greencount, bluecount, quantitycount, disposevalue, speedvalue);
+                            Logboek.addRule(System.currentTimeMillis(), "Settings successfully saved to Database");
+                            showInfo("Opgeslagen", "De instellingen zijn succesvol in de Database opgeslagen!");
                         } catch (Exception e) {
                             Logboek.addRule(System.currentTimeMillis(), "ERROR: Settings can't be saved to Database!");
-                            showWarning("Fout tijdens opslaan", "De instellingen konden niet in de Database opgeslagen worden! Probeer het opnieuw.");
+                            showError("Fout tijdens opslaan", "De instellingen konden niet in de Database opgeslagen worden! Probeer het opnieuw.");
                         }
                     }
                 } catch (NumberFormatException e) {
-                    Logboek.addRule(System.currentTimeMillis(), "ERROR: Invalid input in one of the text fields");
+                    Logboek.addRule(System.currentTimeMillis(), "WARNING: Invalid input in one of the text fields");
                     showWarning("Er is een fout opgetreden!",
                             "Een of meerdere van de instellingen was leeg of bevat niet-numerieke tekst. Verbeter dit.");
                 }
@@ -244,18 +270,27 @@ public class GUInew extends Application {
             else if (event.getSource() == prevsettingsbutton) {
                 Logboek.addRule(System.currentTimeMillis(), "Reverting previous settings...");
                 boolean dbdispose = false;
-                double dbslider = 2.0;
+                double dbspeed = 2.0;
                 int dbyellow = 0, dbred = 0, dbgreen = 0, dbblue = 0, dbpackages = 0;
-                //TODO: haal oude gegevens uit de Database op en stel ze terug in
+                List<Integer> dbvalues = Database.QueryPrevSettings();
+                dbyellow = dbvalues.get(0);
+                dbred = dbvalues.get(1);
+                dbgreen = dbvalues.get(2);
+                dbblue = dbvalues.get(3);
+                dbpackages = dbvalues.get(4);
+                if (dbvalues.get(5) == 1) {
+                    dbdispose = true;
+                }
+                dbspeed = dbvalues.get(6);
                 dispose.setSelected(dbdispose);
-                slider.setValue(dbslider);
+                slider.setValue(dbspeed);
                 yellowballfield.setText(String.valueOf(dbyellow));
                 redballfield.setText(String.valueOf(dbred));
                 greenballfield.setText(String.valueOf(dbgreen));
                 blueballfield.setText(String.valueOf(dbblue));
                 packagesfield.setText(String.valueOf(dbpackages));
-                showInfo("Instellingen teruggezet", "De vorige instellingen zijn teruggezet.");
                 Logboek.addRule(System.currentTimeMillis(), "Previous settings reverted");
+                showInfo("Instellingen teruggezet", "De vorige instellingen zijn teruggezet. Vergeet niet om nog op Save te klikken!");
             }
             else if (event.getSource() == startbtn) {
                 Logboek.addRule(System.currentTimeMillis(), "Start button pressed");
@@ -263,22 +298,6 @@ public class GUInew extends Application {
             else if (event.getSource() == stopbtn) {
                 Logboek.addRule(System.currentTimeMillis(), "Stop button pressed");
             }
-        }
-
-        private void showWarning(String header, String text) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Waarschuwing!");
-            alert.setHeaderText(header);
-            alert.setContentText(text);
-            alert.showAndWait();
-        }
-
-        private void showInfo(String header, String text) {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Informatie");
-            alert.setHeaderText(header);
-            alert.setContentText(text);
-            alert.show();
         }
     }
 }
