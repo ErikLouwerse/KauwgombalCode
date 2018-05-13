@@ -12,7 +12,7 @@ public class Database {
     private static String username = "root";
     private static String password = "1424bb@12";
 
-    private static Connection getConnection() {
+    static Connection getConnection() {
         if (con != null) {
             return con;
         }
@@ -30,10 +30,9 @@ public class Database {
 
     static List<Integer> QueryPrevSettings() {
         List<Integer> values = new ArrayList<>();
-        try {
-            Connection con = getConnection();
-            Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM `transacties` WHERE Transactienummer = (SELECT MAX(Transactienummer) FROM `transacties`)");
+        Connection con = getConnection();
+        try (Statement stmt = con.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT * FROM `transacties` WHERE Transactienummer = (SELECT MAX(Transactienummer) FROM `transacties`)")) {
             while (rs.next()) {
                 int yellow = rs.getInt("Geel");
                 int red = rs.getInt("Rood");
@@ -52,9 +51,8 @@ public class Database {
     }
 
     static void PrepQueryLogbook(long time, String text) {
-        try {
-            Connection con = getConnection();
-            PreparedStatement s = con.prepareStatement("INSERT INTO logboek (Tijd, Activiteit) VALUES (?, ?)");
+        Connection con = getConnection();
+        try (PreparedStatement s = con.prepareStatement("INSERT INTO logboek (Tijd, Activiteit) VALUES (?, ?)")) {
             s.setLong(1, time);
             s.setString(2, text);
             s.executeUpdate();
@@ -64,9 +62,8 @@ public class Database {
     }
 
     static void PrepQuery(String query, int yellow, int red, int green, int blue, int quantity, boolean dispose, int speed) {
-        try {
-            Connection con = getConnection();
-            PreparedStatement s = con.prepareStatement(query);
+        Connection con = getConnection();
+        try (PreparedStatement s = con.prepareStatement(query)) {
             s.setInt(1, yellow);
             s.setInt(2, red);
             s.setInt(3, green);
@@ -78,5 +75,22 @@ public class Database {
         } catch (SQLException e) {
             System.out.println("Error: No connection with Database!");
         }
+    }
+
+    static String QueryFullLogbook(int amount) {
+        StringBuilder sb = new StringBuilder();
+        Connection con = getConnection();
+        try (Statement stmt = con.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT * FROM `logboek` ORDER BY Tijd DESC LIMIT " + amount)) {
+            while (rs.next()) {
+                long dbtime = rs.getLong("Tijd");
+                String text = rs.getString("Activiteit");
+                String time = Logboek.convertTime(dbtime);
+                sb.append("[").append(time).append("]  ").append(text).append("\n");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error: No connection with Database!");
+        }
+        return sb.toString();
     }
 }

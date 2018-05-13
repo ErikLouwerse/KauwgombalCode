@@ -7,16 +7,16 @@ import java.util.Date;
 public class Logboek {
     private static ArrayList<String> logrules = new ArrayList<>();
 
-    private static String convertTime(long millis) {
+    static String convertTime(long millis) {
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss.SSS");
         Date resultdate = new Date(millis);
         return sdf.format(resultdate);
     }
 
     static void addRule(long time, String text) {
-        String addme = "[" + convertTime(time) + "] " + text;
+        String addme = "[" + convertTime(time) + "]  " + text + "\n";
         logrules.add(addme);
-        GUInew.getLogarea().appendText(addme + "\n");
+        GUInew.getLogarea().appendText(addme);
         try {
             Database.PrepQueryLogbook(time, text);
         } catch (Exception e) {
@@ -25,9 +25,7 @@ public class Logboek {
         }
     }
 
-    static void printAll() {
-        for(int i=0; i<logrules.size(); i++) {
-            GUInew.getLogarea().appendText(logrules.get(i));
-        }
+    static String getRules(int amount) {
+        return Database.QueryFullLogbook(amount);
     }
 }

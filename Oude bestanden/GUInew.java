@@ -5,47 +5,26 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.LineBuilder;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
-import javax.swing.JCheckBox;
+
+import java.util.List;
 
 public class GUInew extends Application {
 
-    public static void main(String[] args) throws Exception {
-        Communicator1 Communicator1 = new Communicator1();
-        Communicator2 Communicator2 = new Communicator2();
-
-        Communicator1.initialize();
-        Communicator2.initialize();
-
-        Thread t = new Thread() {
-            public void run() {
-                //the following line will keep this app alive for 1000 seconds,
-                //waiting for events to occur and responding to them (printing incoming messages to console).
-                try {
-                    Thread.sleep(10000);
-                } catch (InterruptedException ie) {
-                }
-            }
-        };
-        t.start();
-        //gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        launch(args);
-    }
-
-    private GridPane root, left, right, quantities, buttonpane;
+    private static Communicator1 Communicator1;
+    private static Communicator2 Communicator2;
+    private GridPane root, left, right, quantities, leftbuttonpane;
     private VBox vboxleft, vboxright;
     private Label settingstext, speedlabel, yellowballlabel, redballlabel, greenballlabel, blueballlabel, packageslabel,
             statuslabel, loglabel;
@@ -54,12 +33,16 @@ public class GUInew extends Application {
     private Line blackLine;
     private CheckBox dispose;
     private Slider slider;
-    private Button savebutton, revertbutton;
+    private Button savebutton, prevsettingsbutton, startbtn, stopbtn;
     private GUIbuttonListener listener;
-    private boolean OtherColorChecked = false;
-    private Communicator1 Communicator1;
-    private Communicator2 Communicator2;
-    private Database Database;
+
+    public static void main(String[] args) {
+        Communicator1 = new Communicator1();
+        Communicator2 = new Communicator2();
+        Communicator1.initialize();
+        Communicator2.initialize();
+        launch(args);
+    }
 
     @Override
     public void start(final Stage window) {
@@ -94,14 +77,8 @@ public class GUInew extends Application {
                 .endY(0).fill(Color.BLACK).strokeWidth(2.0f).translateY(-10).build();
         blackLine.endXProperty().bind(window.widthProperty().multiply(0.175));
 
-        if (OtherColorChecked == true) {
-            dispose = new CheckBox("Dispose unnecessary balls");
-            dispose.setOnAction(listener);
-        } else {
-            dispose = new CheckBox("Dispose unnecessary balls");
-            dispose.setOnAction(listener);
-        }
-        dispose.setSelected(OtherColorChecked);
+        dispose = new CheckBox("Dispose unnecessary balls");
+        dispose.setOnAction(listener);
 
         speedlabel = new Label("Speed:");
 
@@ -142,21 +119,21 @@ public class GUInew extends Application {
         savebutton.setFont(Font.font(null, FontWeight.BOLD, Font.getDefault().getSize()));
         savebutton.setOnAction(listener);
         //savebutton.setStyle("-fx-background-color:#5aed5a;");
-        revertbutton = new Button("Revert changes");
-        revertbutton.setOnAction(listener);
+        prevsettingsbutton = new Button("Previous settings");
+        prevsettingsbutton.setOnAction(listener);
 
-        buttonpane = new GridPane();
-        buttonpane.setVgap(10);
-        GridPane.setHalignment(revertbutton, HPos.RIGHT);
+        leftbuttonpane = new GridPane();
+        leftbuttonpane.setVgap(10);
+        GridPane.setHalignment(prevsettingsbutton, HPos.RIGHT);
         ColumnConstraints butcol1 = new ColumnConstraints();
         butcol1.setPercentWidth(50);
         ColumnConstraints butcol2 = new ColumnConstraints();
         butcol2.setPercentWidth(50);
-        buttonpane.getColumnConstraints().addAll(butcol1, butcol2);
-        buttonpane.addColumn(0, savebutton);
-        buttonpane.addColumn(1, revertbutton);
+        leftbuttonpane.getColumnConstraints().addAll(butcol1, butcol2);
+        leftbuttonpane.addColumn(0, savebutton);
+        leftbuttonpane.addColumn(1, prevsettingsbutton);
 
-        vboxleft.getChildren().addAll(settingstext, blackLine, dispose, speedlabel, slider, quantities, buttonpane);
+        vboxleft.getChildren().addAll(settingstext, blackLine, dispose, speedlabel, slider, quantities, leftbuttonpane);
         left.getChildren().addAll(vboxleft);
         //=============================== END LEFT =====================================
 
@@ -182,10 +159,24 @@ public class GUInew extends Application {
         logarea = new TextArea("");
         logarea.setEditable(false);
 
-        //TODO: Log deel en button deel toevoegen
-        vboxright.getChildren().addAll(statuslabel, holder, loglabel, logarea);
+        startbtn = new Button();
+        startbtn.setText("  Start  ");
+        startbtn.setOnAction(listener);
+
+        stopbtn = new Button();
+        stopbtn.setText("  Stop  ");
+        stopbtn.setOnAction(listener);
+
+        BorderPane startstopbuttons = new BorderPane();
+        HBox hbButtons = new HBox();
+        hbButtons.setSpacing(15);
+        hbButtons.setAlignment(Pos.BOTTOM_RIGHT);
+        hbButtons .getChildren().addAll(startbtn, stopbtn);
+        startstopbuttons.setBottom(hbButtons);
+
+        vboxright.getChildren().addAll(statuslabel, holder, loglabel, logarea, startstopbuttons);
         right.getChildren().addAll(vboxright);
-        //=============================== END LEFT =====================================
+        //=============================== END RIGHT =====================================
 
         final Scene scene = new Scene(root, 1000, 600);
         window.setScene(scene);
@@ -194,37 +185,44 @@ public class GUInew extends Application {
         window.show();
     }
 
-    public static TextArea getLogarea() {
+    static TextArea getLogarea() {
         return logarea;
     }
 
-    //============================== INTERNAL CLASSES ======================================
+    static void showInfo(String header, String text) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Informatie");
+        alert.setHeaderText(header);
+        alert.setContentText(text);
+        alert.show();
+    }
+
+    static void showWarning(String header, String text) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Waarschuwing!");
+        alert.setHeaderText(header);
+        alert.setContentText(text);
+        alert.showAndWait();
+    }
+
+    static void showError(String header, String text) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("FOUT!");
+        alert.setHeaderText(header);
+        alert.setContentText(text);
+        alert.showAndWait();
+    }
+
+    //============================== EVENT LISTENER CLASS ======================================
     private class GUIbuttonListener implements EventHandler<ActionEvent> {
 
         @Override
         public void handle(ActionEvent event) {
-            if (event.getSource() == dispose) {
-                if (OtherColorChecked == true) {
-                    OtherColorChecked = false;
-                    try {
-                        Communicator1.ColorDisposeOff();
-                    } catch (Exception e) {
-                        System.out.println("Geen connectie met arduino");
-                    }
-                    Database.Query("UPDATE `settings` SET `Waarde`= 0 WHERE `Naam` = 'Afvoeren'");
-                } else if (OtherColorChecked == false) {
-                    OtherColorChecked = true;
-                    try {
-                        Communicator1.ColorDisposeOn();
-                    } catch (Exception e) {
-                        System.out.println("Geen connectie met arduino");
-                    }
-                    Database.Query("UPDATE `settings` SET `Waarde`= 1 WHERE `Naam` = 'Afvoeren'");
-                }
-            } else if (event.getSource() == savebutton) {
-                //Pressed button was the save button, so get all setting values
+            if (event.getSource() == savebutton) {
+                //Save button was pressed
+                Logboek.addRule(System.currentTimeMillis(), "Saving settings...");
                 boolean disposevalue = dispose.isSelected();
-                double speedvalue = slider.getValue();
+                int speedvalue = (int) slider.getValue();
                 int yellowcount = -1, redcount = -1, greencount = -1, bluecount = -1, quantitycount = -1;
                 try {
                     yellowcount = Integer.parseInt(yellowballfield.getText());
@@ -236,98 +234,70 @@ public class GUInew extends Application {
                     //Check if the input quantities meet the requirements: minimal 0 && maximal 99.
                     if (yellowcount < 0 || yellowcount > 99 || redcount < 0 || redcount > 99 || greencount < 0 || greencount > 99
                             || bluecount < 0 || bluecount > 99 || quantitycount < 0 || quantitycount > 99) {
-                        //Dialog with warning will be showed
+                        Logboek.addRule(System.currentTimeMillis(), "WARNING: one or more of the values are invalid (<0 or >99)");
                         showWarning("Er is een fout opgetreden!",
                                 "Een of meerdere van de ingevulde hoeveelheden is kleiner dan 0 of groter dan 99. Verbeter dit.");
                     } else {
                         try {
+                            Logboek.addRule(System.currentTimeMillis(), "Sending quantities to Arduino2");
                             Communicator2.YellowBalls(yellowcount);
                             Communicator2.RedBalls(redcount);
                             Communicator2.GreenBalls(greencount);
                             Communicator2.Blueballs(bluecount);
                             Communicator2.QuantityPackage(quantitycount);
+                            Logboek.addRule(System.currentTimeMillis(), "Quantities successfully sent to Arduino2");
                         } catch (Exception e){
-                            System.out.println("Geen verbinding met arduino");
+                            Logboek.addRule(System.currentTimeMillis(), "ERROR: No connection with Arduino2!");
+                            showError("Fout tijdens opslaan", "De instellingen konden niet op de Arduino opgeslagen worden! Probeer het opnieuw.");
                         }
-                        Database.PrepQuery("INSERT INTO `transacties` (`Transactienummer`, `Geel`, `Rood`, `Groen`, `Blauw`, `Aantal pakketten`) SELECT MAX(Transactienummer)+1,?,?,?,?,? FROM transacties", yellowcount, redcount, greencount, bluecount, quantitycount);
-                        Logboek.addRule(System.currentTimeMillis(), "Saving settings...");
-                        Logboek.addRule(System.currentTimeMillis(), "Values are: " + disposevalue + " " + speedvalue + " " + yellowcount
-                                + " " + redcount + " " + greencount + " " + bluecount + " " + quantitycount);
-                        //TODO: sla op in Database
-                        Logboek.addRule(System.currentTimeMillis(), "Settings saved successfully");
-                        showInfo("Opgeslagen", "De instellingen zijn succesvol opgeslagen!");
+                        try {
+                            Logboek.addRule(System.currentTimeMillis(), "Saving settings to Database");
+                            Database.PrepQuery("INSERT INTO `transacties` (`Transactienummer`, `Geel`, `Rood`, `Groen`, `Blauw`, `Aantal pakketten`, `Afvoeren`, `Snelheid`) " +
+                                    "SELECT MAX(Transactienummer)+1,?,?,?,?,?,?,? FROM transacties", yellowcount, redcount, greencount, bluecount, quantitycount, disposevalue, speedvalue);
+                            Logboek.addRule(System.currentTimeMillis(), "Settings successfully saved to Database");
+                            showInfo("Opgeslagen", "De instellingen zijn succesvol in de Database opgeslagen!");
+                        } catch (Exception e) {
+                            Logboek.addRule(System.currentTimeMillis(), "ERROR: Settings can't be saved to Database!");
+                            showError("Fout tijdens opslaan", "De instellingen konden niet in de Database opgeslagen worden! Probeer het opnieuw.");
+                        }
                     }
                 } catch (NumberFormatException e) {
-                    //Dialog with warning will be showed
+                    Logboek.addRule(System.currentTimeMillis(), "WARNING: Invalid input in one of the text fields");
                     showWarning("Er is een fout opgetreden!",
                             "Een of meerdere van de instellingen was leeg of bevat niet-numerieke tekst. Verbeter dit.");
                 }
-            } else if (event.getSource() == revertbutton) {
-                Logboek.addRule(System.currentTimeMillis(), "Reverting settings...");
+            }
+            else if (event.getSource() == prevsettingsbutton) {
+                Logboek.addRule(System.currentTimeMillis(), "Reverting previous settings...");
                 boolean dbdispose = false;
-                double dbslider = 2.0;
+                double dbspeed = 2.0;
                 int dbyellow = 0, dbred = 0, dbgreen = 0, dbblue = 0, dbpackages = 0;
-                //TODO: haal oude gegevens uit de Database op en stel ze terug in
+                List<Integer> dbvalues = Database.QueryPrevSettings();
+                dbyellow = dbvalues.get(0);
+                dbred = dbvalues.get(1);
+                dbgreen = dbvalues.get(2);
+                dbblue = dbvalues.get(3);
+                dbpackages = dbvalues.get(4);
+                if (dbvalues.get(5) == 1) {
+                    dbdispose = true;
+                }
+                dbspeed = dbvalues.get(6);
                 dispose.setSelected(dbdispose);
-                slider.setValue(dbslider);
+                slider.setValue(dbspeed);
                 yellowballfield.setText(String.valueOf(dbyellow));
                 redballfield.setText(String.valueOf(dbred));
                 greenballfield.setText(String.valueOf(dbgreen));
                 blueballfield.setText(String.valueOf(dbblue));
                 packagesfield.setText(String.valueOf(dbpackages));
-                showInfo("Instellingen teruggezet", "De vorige instellingen zijn teruggezet.");
-                Logboek.addRule(System.currentTimeMillis(), "Settings reverted");
+                Logboek.addRule(System.currentTimeMillis(), "Previous settings reverted");
+                showInfo("Instellingen teruggezet", "De vorige instellingen zijn teruggezet. Vergeet niet om nog op Save te klikken!");
             }
-        }
-
-        private void showWarning(String header, String text) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Waarschuwing!");
-            alert.setHeaderText(header);
-            alert.setContentText(text);
-            alert.showAndWait();
-        }
-
-        private void showInfo(String header, String text) {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Informatie");
-            alert.setHeaderText(header);
-            alert.setContentText(text);
-            alert.show();
-        }
-    }
-
-    private class ResizableCanvas extends Canvas {
-
-        public ResizableCanvas() {
-            // Redraw canvas when size changes.
-            widthProperty().addListener(evt -> draw());
-            heightProperty().addListener(evt -> draw());
-        }
-
-        private void draw() {
-            double width = getWidth();
-            double height = getHeight();
-            GraphicsContext gc = getGraphicsContext2D();
-            gc.clearRect(0, 0, width, height);
-            gc.setStroke(Color.RED);
-            gc.strokeLine(0, 0, width, height);
-            gc.strokeLine(0, height, width, 0);
-        }
-
-        @Override
-        public boolean isResizable() {
-            return true;
-        }
-
-        @Override
-        public double prefWidth(double height) {
-            return getWidth();
-        }
-
-        @Override
-        public double prefHeight(double width) {
-            return getHeight();
+            else if (event.getSource() == startbtn) {
+                Logboek.addRule(System.currentTimeMillis(), "Start button pressed");
+            }
+            else if (event.getSource() == stopbtn) {
+                Logboek.addRule(System.currentTimeMillis(), "Stop button pressed");
+            }
         }
     }
 }

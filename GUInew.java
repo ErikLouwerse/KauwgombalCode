@@ -10,6 +10,10 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
@@ -18,6 +22,9 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.sql.SQLException;
 import java.util.List;
 
 public class GUInew extends Application {
@@ -33,7 +40,7 @@ public class GUInew extends Application {
     private Line blackLine;
     private CheckBox dispose;
     private Slider slider;
-    private Button savebutton, prevsettingsbutton, startbtn, stopbtn;
+    private Button savebutton, prevsettingsbutton, logbtn, startbtn, stopbtn;
     private GUIbuttonListener listener;
 
     public static void main(String[] args) {
@@ -147,8 +154,6 @@ public class GUInew extends Application {
 
         Canvas canvas = new Canvas(1500, 500);
         StackPane holder = new StackPane();
-        //canvas.widthProperty().bind(window.widthProperty().multiply(0.8));
-        //canvas.heightProperty().bind(window.heightProperty().multiply(1).subtract(50));
         holder.getChildren().add(canvas);
         holder.setStyle("-fx-background-color: white");
         GraphicsContext gc = canvas.getGraphicsContext2D();
@@ -159,6 +164,10 @@ public class GUInew extends Application {
         logarea = new TextArea("");
         logarea.setEditable(false);
 
+        logbtn = new Button();
+        logbtn.setText("Show logbook");
+        logbtn.setOnAction(listener);
+
         startbtn = new Button();
         startbtn.setText("  Start  ");
         startbtn.setOnAction(listener);
@@ -167,14 +176,18 @@ public class GUInew extends Application {
         stopbtn.setText("  Stop  ");
         stopbtn.setOnAction(listener);
 
-        BorderPane startstopbuttons = new BorderPane();
-        HBox hbButtons = new HBox();
-        hbButtons.setSpacing(15);
-        hbButtons.setAlignment(Pos.BOTTOM_RIGHT);
-        hbButtons .getChildren().addAll(startbtn, stopbtn);
-        startstopbuttons.setBottom(hbButtons);
+        BorderPane controlbuttons = new BorderPane();
+        HBox startstopbuttons = new HBox();
+        startstopbuttons.setSpacing(15);
+        startstopbuttons.setAlignment(Pos.BOTTOM_RIGHT);
+        startstopbuttons.getChildren().addAll(startbtn, stopbtn);
+        HBox logbookbutton = new HBox();
+        logbookbutton.setAlignment(Pos.BOTTOM_LEFT);
+        logbookbutton.getChildren().addAll(logbtn);
+        controlbuttons.setLeft(startstopbuttons);
+        controlbuttons.setRight(logbookbutton);
 
-        vboxright.getChildren().addAll(statuslabel, holder, loglabel, logarea, startstopbuttons);
+        vboxright.getChildren().addAll(statuslabel, holder, loglabel, logarea, controlbuttons);
         right.getChildren().addAll(vboxright);
         //=============================== END RIGHT =====================================
 
@@ -183,6 +196,15 @@ public class GUInew extends Application {
         window.setTitle("Kauwgomballen HMI");
         window.setMaximized(true);
         window.show();
+    }
+
+    @Override
+    public void stop(){
+        try {
+            Database.getConnection().close();
+        } catch (SQLException e) {
+            System.out.println("Error while closing Database connection, connection probably not closed");
+        }
     }
 
     static TextArea getLogarea() {
@@ -211,6 +233,52 @@ public class GUInew extends Application {
         alert.setHeaderText(header);
         alert.setContentText(text);
         alert.showAndWait();
+    }
+
+    private void showLogbookDialog() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Logboek inhoud");
+        alert.setHeaderText("Het logboek gesorteerd van nieuw naar oud");
+        alert.setGraphic(null);
+
+        Label amountlabel = new Label("Aantal regels:");
+        TextField amountfield = new TextField("50");
+        Button apply = new Button("Toepassen");
+        HBox hbox = new HBox(10);
+        hbox.getChildren().addAll(amountlabel, amountfield, apply);
+
+        String dblogrules = Logboek.getRules(50);
+        TextArea textArea = new TextArea(dblogrules);
+        textArea.setPrefWidth(1000);
+        textArea.setPrefHeight(500);
+        textArea.setEditable(false);
+        textArea.setWrapText(false);
+        apply.setOnAction(event -> {
+            try {
+                textArea.setText(Logboek.getRules(Integer.parseInt(amountfield.getText())));
+            } catch (NumberFormatException e) {
+                showWarning("Er is een fout opgetreden!", "De invoer was leeg of bevat niet-numerieke tekst. Verbeter dit.");
+            }
+        });
+
+        Button savelogbtn = new Button("Opslaan naar bestand");
+        savelogbtn.setOnAction(event -> {
+            try {
+                PrintWriter out = new PrintWriter("Logboek.txt");
+                out.println(Logboek.getRules(Integer.parseInt(amountfield.getText())));
+                out.close();
+                showInfo("Succesvol opgeslagen", "Het logboek met "+amountfield.getText()+" regels is succesvol naar " +
+                        "het bestand 'Logboek.txt' opgeslagen. U kunt dit bestand in de project map vinden.");
+            } catch (FileNotFoundException e) {
+                showWarning("Fout tijdens opslaan!", "Kon het logboek niet in een bestand opslaan. Probeer het later nog eens.");
+            }
+        });
+        VBox vbox = new VBox(10);
+        vbox.getChildren().addAll(hbox, textArea, savelogbtn);
+
+        DialogPane pane = alert.getDialogPane();
+        pane.setContent(vbox);
+        alert.show();
     }
 
     //============================== EVENT LISTENER CLASS ======================================
@@ -243,7 +311,7 @@ public class GUInew extends Application {
                             Communicator2.YellowBalls(yellowcount);
                             Communicator2.RedBalls(redcount);
                             Communicator2.GreenBalls(greencount);
-                            Communicator2.Blueballs(bluecount);
+                            Communicator2.BlueBalls(bluecount);
                             Communicator2.QuantityPackage(quantitycount);
                             Logboek.addRule(System.currentTimeMillis(), "Quantities successfully sent to Arduino2");
                         } catch (Exception e){
@@ -297,6 +365,10 @@ public class GUInew extends Application {
             }
             else if (event.getSource() == stopbtn) {
                 Logboek.addRule(System.currentTimeMillis(), "Stop button pressed");
+            }
+            else if (event.getSource() == logbtn) {
+                Logboek.addRule(System.currentTimeMillis(), "Logbook button pressed");
+                showLogbookDialog();
             }
         }
     }
