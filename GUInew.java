@@ -1,6 +1,7 @@
 package javaarduino;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
@@ -21,8 +22,10 @@ import javafx.scene.shape.LineBuilder;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import sun.management.snmp.jvminstr.JvmThreadInstanceEntryImpl;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.List;
@@ -191,6 +194,17 @@ public class GUInew extends Application {
         right.getChildren().addAll(vboxright);
         //=============================== END RIGHT =====================================
 
+        if (!Communicator1.tempLog.isEmpty()) {
+            for (int i = 0; i < Communicator1.tempLog.size(); i++ ) {
+                logarea.appendText(Communicator1.tempLog.get(i).concat("\n"));
+            }
+        }
+        if (!Communicator2.tempLog.isEmpty()) {
+            for (int i = 0; i < Communicator2.tempLog.size(); i++ ) {
+                logarea.appendText(Communicator2.tempLog.get(i).concat("\n"));
+            }
+        }
+
         final Scene scene = new Scene(root, 1000, 600);
         window.setScene(scene);
         window.setTitle("Kauwgomballen HMI");
@@ -200,11 +214,36 @@ public class GUInew extends Application {
 
     @Override
     public void stop(){
+        System.out.println("DOEI!");
         try {
             Database.getConnection().close();
         } catch (SQLException e) {
             System.out.println("Error while closing Database connection, connection probably not closed");
         }
+        System.out.println("NU ECHT!");
+        try {
+            if (Communicator1.input != null) {
+                Communicator1.input.close();
+            }
+            if (Communicator1.output != null) {
+                Communicator1.output.close();
+            }
+            if (Communicator1.serialPort != null) {
+                Communicator1.serialPort.close();
+            }
+            if (Communicator2.input != null) {
+                Communicator2.input.close();
+            }
+            if (Communicator2.output != null) {
+                Communicator2.output.close();
+            }
+            if (Communicator2.serialPort != null) {
+                Communicator2.serialPort.close();
+            }
+        } catch (IOException e) {
+            System.out.println("ERROR while stopping application!");
+        }
+        //return;
     }
 
     static TextArea getLogarea() {

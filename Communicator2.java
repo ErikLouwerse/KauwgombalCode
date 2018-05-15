@@ -8,19 +8,21 @@ import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 
 public class Communicator2 implements SerialPortEventListener {
     SerialPort serialPort;
+    ArrayList<String> tempLog = new ArrayList<>();
 
     //The port we're going to use.
-    private String PORT_NAME[] = { "COM6" };
+    private String PORT_NAME[] = { "COM3" };
 
     //A BufferedReader which will be fed by a InputStreamReader converting the bytes into characters
-    private BufferedReader input;
+    BufferedReader input;
 
     //The output stream to the port
-    private OutputStream output;
+    OutputStream output;
 
     //Milliseconds to block while waiting for port open
     private int TIME_OUT = 2000;
@@ -44,7 +46,7 @@ public class Communicator2 implements SerialPortEventListener {
         }
 
         if (portId == null) {
-            System.out.println("ERROR: Could not find COM port for Arduino2!");
+            tempLog.add("[" + Logboek.convertTime(System.currentTimeMillis()) + "]  ERROR: Could not find COM port for Arduino2!");
             return;
         }
 
@@ -63,8 +65,7 @@ public class Communicator2 implements SerialPortEventListener {
             serialPort.addEventListener(this);
             serialPort.notifyOnDataAvailable(true);
         } catch (Exception e) {
-            Logboek.addRule(System.currentTimeMillis(), "ERROR: Could not initialize serialport or input/output streams!");
-            GUInew.showError("Error with Arduino2", "Could not initialize serialport or input/output streams. Please try again.");
+            tempLog.add("[" + Logboek.convertTime(System.currentTimeMillis()) + "]  ERROR: Could not initialize serialport or input/output streams!");
         }
     }
 
@@ -74,10 +75,10 @@ public class Communicator2 implements SerialPortEventListener {
         if (oEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
             try {
                 String inputLine = input.readLine();
+                System.out.println(inputLine);
                 Logboek.addRule(System.currentTimeMillis(), "(Arduino2): " + inputLine);
             } catch (IOException e) {
-                Logboek.addRule(System.currentTimeMillis(), "ERROR: could not read output from Arduino2!");
-                GUInew.showError("Error with Arduino2", "Could not read output from Arduino2");
+                //GUInew.showError("Error with Arduino2", "Could not read output from Arduino2");
             }
         }
     }
