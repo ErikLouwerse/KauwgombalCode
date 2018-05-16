@@ -32,6 +32,8 @@ import java.util.List;
 
 public class GUInew extends Application {
 
+    static GraphicsContext gc;
+
     private static Communicator1 Communicator1;
     private static Communicator2 Communicator2;
     private GridPane root, left, right, quantities, leftbuttonpane;
@@ -159,8 +161,7 @@ public class GUInew extends Application {
         StackPane holder = new StackPane();
         holder.getChildren().add(canvas);
         holder.setStyle("-fx-background-color: white");
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-        gc.fillOval(20, 20, 50, 50);
+        gc = canvas.getGraphicsContext2D();
 
         loglabel = new Label("Logboek:");
 
@@ -194,17 +195,6 @@ public class GUInew extends Application {
         right.getChildren().addAll(vboxright);
         //=============================== END RIGHT =====================================
 
-        if (!Communicator1.tempLog.isEmpty()) {
-            for (int i = 0; i < Communicator1.tempLog.size(); i++ ) {
-                logarea.appendText(Communicator1.tempLog.get(i).concat("\n"));
-            }
-        }
-        if (!Communicator2.tempLog.isEmpty()) {
-            for (int i = 0; i < Communicator2.tempLog.size(); i++ ) {
-                logarea.appendText(Communicator2.tempLog.get(i).concat("\n"));
-            }
-        }
-
         final Scene scene = new Scene(root, 1000, 600);
         window.setScene(scene);
         window.setTitle("Kauwgomballen HMI");
@@ -213,14 +203,12 @@ public class GUInew extends Application {
     }
 
     @Override
-    public void stop(){
-        System.out.println("DOEI!");
+    public void stop() {
         try {
             Database.getConnection().close();
         } catch (SQLException e) {
             System.out.println("Error while closing Database connection, connection probably not closed");
         }
-        System.out.println("NU ECHT!");
         try {
             if (Communicator1.input != null) {
                 Communicator1.input.close();
@@ -243,7 +231,6 @@ public class GUInew extends Application {
         } catch (IOException e) {
             System.out.println("ERROR while stopping application!");
         }
-        //return;
     }
 
     static TextArea getLogarea() {
@@ -306,8 +293,8 @@ public class GUInew extends Application {
                 PrintWriter out = new PrintWriter("Logboek.txt");
                 out.println(Logboek.getRules(Integer.parseInt(amountfield.getText())));
                 out.close();
-                showInfo("Succesvol opgeslagen", "Het logboek met "+amountfield.getText()+" regels is succesvol naar " +
-                        "het bestand 'Logboek.txt' opgeslagen. U kunt dit bestand in de project map vinden.");
+                showInfo("Succesvol opgeslagen", "Het logboek met " + amountfield.getText() + " regels is succesvol naar "
+                        + "het bestand 'Logboek.txt' opgeslagen. U kunt dit bestand in de project map vinden.");
             } catch (FileNotFoundException e) {
                 showWarning("Fout tijdens opslaan!", "Kon het logboek niet in een bestand opslaan. Probeer het later nog eens.");
             }
@@ -353,14 +340,14 @@ public class GUInew extends Application {
                             Communicator2.BlueBalls(bluecount);
                             Communicator2.QuantityPackage(quantitycount);
                             Logboek.addRule(System.currentTimeMillis(), "Quantities successfully sent to Arduino2");
-                        } catch (Exception e){
+                        } catch (Exception e) {
                             Logboek.addRule(System.currentTimeMillis(), "ERROR: No connection with Arduino2!");
                             showError("Fout tijdens opslaan", "De instellingen konden niet op de Arduino opgeslagen worden! Probeer het opnieuw.");
                         }
                         try {
                             Logboek.addRule(System.currentTimeMillis(), "Saving settings to Database");
-                            Database.PrepQuery("INSERT INTO `transacties` (`Transactienummer`, `Geel`, `Rood`, `Groen`, `Blauw`, `Aantal pakketten`, `Afvoeren`, `Snelheid`) " +
-                                    "SELECT MAX(Transactienummer)+1,?,?,?,?,?,?,? FROM transacties", yellowcount, redcount, greencount, bluecount, quantitycount, disposevalue, speedvalue);
+                            Database.PrepQuery("INSERT INTO `transacties` (`Transactienummer`, `Geel`, `Rood`, `Groen`, `Blauw`, `Aantal pakketten`, `Afvoeren`, `Snelheid`) "
+                                    + "SELECT MAX(Transactienummer)+1,?,?,?,?,?,?,? FROM transacties", yellowcount, redcount, greencount, bluecount, quantitycount, disposevalue, speedvalue);
                             Logboek.addRule(System.currentTimeMillis(), "Settings successfully saved to Database");
                             showInfo("Opgeslagen", "De instellingen zijn succesvol in de Database opgeslagen!");
                         } catch (Exception e) {
@@ -373,8 +360,7 @@ public class GUInew extends Application {
                     showWarning("Er is een fout opgetreden!",
                             "Een of meerdere van de instellingen was leeg of bevat niet-numerieke tekst. Verbeter dit.");
                 }
-            }
-            else if (event.getSource() == prevsettingsbutton) {
+            } else if (event.getSource() == prevsettingsbutton) {
                 Logboek.addRule(System.currentTimeMillis(), "Reverting previous settings...");
                 boolean dbdispose = false;
                 double dbspeed = 2.0;
@@ -398,14 +384,11 @@ public class GUInew extends Application {
                 packagesfield.setText(String.valueOf(dbpackages));
                 Logboek.addRule(System.currentTimeMillis(), "Previous settings reverted");
                 showInfo("Instellingen teruggezet", "De vorige instellingen zijn teruggezet. Vergeet niet om nog op Save te klikken!");
-            }
-            else if (event.getSource() == startbtn) {
+            } else if (event.getSource() == startbtn) {
                 Logboek.addRule(System.currentTimeMillis(), "Start button pressed");
-            }
-            else if (event.getSource() == stopbtn) {
+            } else if (event.getSource() == stopbtn) {
                 Logboek.addRule(System.currentTimeMillis(), "Stop button pressed");
-            }
-            else if (event.getSource() == logbtn) {
+            } else if (event.getSource() == logbtn) {
                 Logboek.addRule(System.currentTimeMillis(), "Logbook button pressed");
                 showLogbookDialog();
             }

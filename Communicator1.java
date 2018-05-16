@@ -8,15 +8,17 @@ import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.scene.paint.Color;
 
 public class Communicator1 implements SerialPortEventListener {
+
     SerialPort serialPort;
-    ArrayList<String> tempLog = new ArrayList<>();
 
     //The port we're going to use.
-    private String PORT_NAME[] = { "COM4" };
+    private String PORT_NAME[] = {"COM5"};
 
     //A BufferedReader which will be fed by a InputStreamReader converting the bytes into characters
     BufferedReader input;
@@ -46,7 +48,7 @@ public class Communicator1 implements SerialPortEventListener {
         }
 
         if (portId == null) {
-            tempLog.add("[" + Logboek.convertTime(System.currentTimeMillis()) + "]  ERROR: Could not find COM port for Arduino1!");
+            System.out.println("ERROR: Could not find COM port for Arduino1!");
             return;
         }
 
@@ -65,7 +67,8 @@ public class Communicator1 implements SerialPortEventListener {
             serialPort.addEventListener(this);
             serialPort.notifyOnDataAvailable(true);
         } catch (Exception e) {
-            tempLog.add("[" + Logboek.convertTime(System.currentTimeMillis()) + "]  ERROR: Could not initialize serialport or input/output streams!");
+            Logboek.addRule(System.currentTimeMillis(), "ERROR: Could not initialize serialport or input/output streams!");
+            GUInew.showError("Error with Arduino1", "Could not initialize serialport or input/output streams. Please try again.");
         }
     }
 
@@ -75,10 +78,42 @@ public class Communicator1 implements SerialPortEventListener {
         if (oEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
             try {
                 String inputLine = input.readLine();
-                System.out.println(inputLine);
                 Logboek.addRule(System.currentTimeMillis(), "(Arduino1): " + inputLine);
+                if (inputLine.equals("rood")) {
+                    GUInew.gc.setFill(Color.RED);
+                    for (int i = 0; i < 500; i = i + 2) {
+                        GUInew.gc.clearRect(0, 0, 5000, 5000);
+                        GUInew.gc.fillOval(20, i, 50, 50);
+                        Thread.sleep(10);
+                    }
+                }
+                if (inputLine.equals("geel")) {
+                    GUInew.gc.setFill(Color.YELLOW);
+                    for (int i = 0; i < 500; i = i + 2) {
+                        GUInew.gc.clearRect(0, 0, 5000, 5000);
+                        GUInew.gc.fillOval(20, i, 50, 50);
+                        Thread.sleep(10);
+                    }
+                }
+                if (inputLine.equals("blauw")) {
+                    GUInew.gc.setFill(Color.BLUE);
+                    for (int i = 0; i < 500; i = i + 2) {
+                        GUInew.gc.clearRect(0, 0, 5000, 5000);
+                        GUInew.gc.fillOval(20, i, 50, 50);
+                        Thread.sleep(10);
+                    }
+                }
+                if (inputLine.equals("groen")) {
+                    GUInew.gc.setFill(Color.GREEN);
+                    for (int i = 0; i < 500; i = i + 2) {
+                        GUInew.gc.clearRect(0, 0, 5000, 5000);
+                        GUInew.gc.fillOval(20, i, 50, 50);
+                        Thread.sleep(10);
+                    }
+                }
             } catch (IOException e) {
-                //GUInew.showError("Error with Arduino1", "Could not read output from Arduino1");
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Communicator1.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
