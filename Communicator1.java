@@ -9,9 +9,6 @@ import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 import java.io.IOException;
 import java.util.Enumeration;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import static javaarduino.GUInew.gc;
 import javafx.scene.paint.Color;
 
 public class Communicator1 implements SerialPortEventListener {
@@ -24,7 +21,7 @@ public class Communicator1 implements SerialPortEventListener {
     SerialPort serialPort;
 
     //The port we're going to use.
-    private String PORT_NAME[] = {"COM6"};
+    private String PORT_NAME[] = {"COM4"};
 
     //A BufferedReader which will be fed by a InputStreamReader converting the bytes into characters
     BufferedReader input;
@@ -73,8 +70,7 @@ public class Communicator1 implements SerialPortEventListener {
             serialPort.addEventListener(this);
             serialPort.notifyOnDataAvailable(true);
         } catch (Exception e) {
-            Logboek.addRule(System.currentTimeMillis(), "ERROR: Could not initialize serialport or input/output streams!");
-            GUInew.showError("Error with Arduino1", "Could not initialize serialport or input/output streams. Please try again.");
+            System.out.println("ERROR: Could not initialize serialport or input/output streams!");
         }
     }
 
@@ -91,30 +87,32 @@ public class Communicator1 implements SerialPortEventListener {
                         GUInew.gc.clearRect(0, 0, 5000, 5000);
                         GUInew.gc.setFill(Color.RED);
                         GUInew.gc.fillOval(i, 232, 36, 36);
-                        gc.strokeRect(20, 200, 200, 100);
-                        gc.strokeRect(220, 225, 200, 50);
-                        gc.strokeRect(450, 215, 80, 70);
+                        GUInew.gc.strokeRect(20, 200, 200, 100);
+                        GUInew.gc.strokeLine(220,225, 425, 145);
+                        GUInew.gc.strokeLine(220,275, 425, 195);
+                        //GUInew.gc.strokeRect(220, 225, 200, 50);
+                        GUInew.gc.strokeRect(450, 215, 80, 70);
                         GUInew.gc.setFill(Color.GREEN);
                         GUInew.gc.fillOval(455, 232, 36, 36);
                         GUInew.gc.setFill(Color.BLACK);
-                        gc.fillText("X " + groencount, 495, 255);
-                        gc.strokeRect(425, 135, 80, 70);
+                        GUInew.gc.fillText("X " + groencount, 495, 255);
+                        GUInew.gc.strokeRect(425, 135, 80, 70);
                         GUInew.gc.setFill(Color.RED);
                         GUInew.gc.fillOval(430, 152, 36, 36);
                         GUInew.gc.setFill(Color.BLACK);
-                        gc.fillText("X " + roodcount, 470, 175);
-                        gc.strokeRect(425, 295, 80, 70);
+                        GUInew.gc.fillText("X " + roodcount, 470, 175);
+                        GUInew.gc.strokeRect(425, 295, 80, 70);
                         GUInew.gc.setFill(Color.BLUE);
                         GUInew.gc.fillOval(430, 312, 36, 36);
                         GUInew.gc.setFill(Color.BLACK);
-                        gc.fillText("X " + blauwcount, 470, 335);
-                        gc.strokeRect(400, 55, 80, 70);
+                        GUInew.gc.fillText("X " + blauwcount, 470, 335);
+                        GUInew.gc.strokeRect(400, 55, 80, 70);
                         GUInew.gc.setFill(Color.YELLOW);
                         GUInew.gc.fillOval(405, 72, 36, 36);
                         GUInew.gc.setFill(Color.BLACK);
-                        gc.fillText("X " + geelcount, 445, 95);
-                        gc.strokeRect(400, 375, 80, 70);
-                        gc.fillText("RESTBAK", 410, 415);
+                        GUInew.gc.fillText("X " + geelcount, 445, 95);
+                        GUInew.gc.strokeRect(400, 375, 80, 70);
+                        GUInew.gc.fillText("Restbak", 410, 415);
                         Thread.sleep(20);
                     }
                 }
@@ -124,30 +122,32 @@ public class Communicator1 implements SerialPortEventListener {
                         GUInew.gc.clearRect(0, 0, 5000, 5000);
                         GUInew.gc.setFill(Color.YELLOW);
                         GUInew.gc.fillOval(i, 232, 36, 36);
-                        gc.strokeRect(20, 200, 200, 100);
-                        gc.strokeRect(220, 225, 200, 50);
-                        gc.strokeRect(450, 215, 80, 70);
+                        GUInew.gc.strokeRect(20, 200, 200, 100);
+                        GUInew.gc.strokeLine(220,225, 400, 65);
+                        GUInew.gc.strokeLine(220,275, 400, 115);
+                        //GUInew.gc.strokeRect(220, 225, 200, 50);
+                        GUInew.gc.strokeRect(450, 215, 80, 70);
                         GUInew.gc.setFill(Color.GREEN);
                         GUInew.gc.fillOval(455, 232, 36, 36);
                         GUInew.gc.setFill(Color.BLACK);
-                        gc.fillText("X " + groencount, 495, 255);
-                        gc.strokeRect(425, 135, 80, 70);
+                        GUInew.gc.fillText("X " + groencount, 495, 255);
+                        GUInew.gc.strokeRect(425, 135, 80, 70);
                         GUInew.gc.setFill(Color.RED);
                         GUInew.gc.fillOval(430, 152, 36, 36);
                         GUInew.gc.setFill(Color.BLACK);
-                        gc.fillText("X " + roodcount, 470, 175);
-                        gc.strokeRect(425, 295, 80, 70);
+                        GUInew.gc.fillText("X " + roodcount, 470, 175);
+                        GUInew.gc.strokeRect(425, 295, 80, 70);
                         GUInew.gc.setFill(Color.BLUE);
                         GUInew.gc.fillOval(430, 312, 36, 36);
                         GUInew.gc.setFill(Color.BLACK);
-                        gc.fillText("X " + blauwcount, 470, 335);
-                        gc.strokeRect(400, 55, 80, 70);
+                        GUInew.gc.fillText("X " + blauwcount, 470, 335);
+                        GUInew.gc.strokeRect(400, 55, 80, 70);
                         GUInew.gc.setFill(Color.YELLOW);
                         GUInew.gc.fillOval(405, 72, 36, 36);
                         GUInew.gc.setFill(Color.BLACK);
-                        gc.fillText("X " + geelcount, 445, 95);
-                        gc.strokeRect(400, 375, 80, 70);
-                        gc.fillText("RESTBAK", 410, 415);
+                        GUInew.gc.fillText("X " + geelcount, 445, 95);
+                        GUInew.gc.strokeRect(400, 375, 80, 70);
+                        GUInew.gc.fillText("Restbak", 410, 415);
                         Thread.sleep(20);
                     }
                 }
@@ -157,30 +157,32 @@ public class Communicator1 implements SerialPortEventListener {
                         GUInew.gc.clearRect(0, 0, 5000, 5000);
                         GUInew.gc.setFill(Color.BLUE);
                         GUInew.gc.fillOval(i, 232, 36, 36);
-                        gc.strokeRect(20, 200, 200, 100);
-                        gc.strokeRect(220, 225, 200, 50);
-                        gc.strokeRect(450, 215, 80, 70);
+                        GUInew.gc.strokeRect(20, 200, 200, 100);
+                        GUInew.gc.strokeLine(220,225, 425, 305);
+                        GUInew.gc.strokeLine(220,275, 425, 355);
+                        //GUInew.gc.strokeRect(220, 225, 200, 50);
+                        GUInew.gc.strokeRect(450, 215, 80, 70);
                         GUInew.gc.setFill(Color.GREEN);
                         GUInew.gc.fillOval(455, 232, 36, 36);
                         GUInew.gc.setFill(Color.BLACK);
-                        gc.fillText("X " + groencount, 495, 255);
-                        gc.strokeRect(425, 135, 80, 70);
+                        GUInew.gc.fillText("X " + groencount, 495, 255);
+                        GUInew.gc.strokeRect(425, 135, 80, 70);
                         GUInew.gc.setFill(Color.RED);
                         GUInew.gc.fillOval(430, 152, 36, 36);
                         GUInew.gc.setFill(Color.BLACK);
-                        gc.fillText("X " + roodcount, 470, 175);
-                        gc.strokeRect(425, 295, 80, 70);
+                        GUInew.gc.fillText("X " + roodcount, 470, 175);
+                        GUInew.gc.strokeRect(425, 295, 80, 70);
                         GUInew.gc.setFill(Color.BLUE);
                         GUInew.gc.fillOval(430, 312, 36, 36);
                         GUInew.gc.setFill(Color.BLACK);
-                        gc.fillText("X " + blauwcount, 470, 335);
-                        gc.strokeRect(400, 55, 80, 70);
+                        GUInew.gc.fillText("X " + blauwcount, 470, 335);
+                        GUInew.gc.strokeRect(400, 55, 80, 70);
                         GUInew.gc.setFill(Color.YELLOW);
                         GUInew.gc.fillOval(405, 72, 36, 36);
                         GUInew.gc.setFill(Color.BLACK);
-                        gc.fillText("X " + geelcount, 445, 95);
-                        gc.strokeRect(400, 375, 80, 70);
-                        gc.fillText("RESTBAK", 410, 415);
+                        GUInew.gc.fillText("X " + geelcount, 445, 95);
+                        GUInew.gc.strokeRect(400, 375, 80, 70);
+                        GUInew.gc.fillText("Restbak", 410, 415);
                         Thread.sleep(20);
                     }
                 }
@@ -190,36 +192,36 @@ public class Communicator1 implements SerialPortEventListener {
                         GUInew.gc.clearRect(0, 0, 5000, 5000);
                         GUInew.gc.setFill(Color.GREEN);
                         GUInew.gc.fillOval(i, 232, 36, 36);
-                        gc.strokeRect(20, 200, 200, 100);
-                        gc.strokeRect(220, 225, 200, 50);
-                        gc.strokeRect(450, 215, 80, 70);
+                        GUInew.gc.strokeRect(20, 200, 200, 100);
+                        GUInew.gc.strokeLine(220,225, 450, 225);
+                        GUInew.gc.strokeLine(220,275, 450, 275);
+                        //GUInew.gc.strokeRect(220, 225, 200, 50);
+                        GUInew.gc.strokeRect(450, 215, 80, 70);
                         GUInew.gc.setFill(Color.GREEN);
                         GUInew.gc.fillOval(455, 232, 36, 36);
                         GUInew.gc.setFill(Color.BLACK);
-                        gc.fillText("X " + groencount, 495, 255);
-                        gc.strokeRect(425, 135, 80, 70);
+                        GUInew.gc.fillText("X " + groencount, 495, 255);
+                        GUInew.gc.strokeRect(425, 135, 80, 70);
                         GUInew.gc.setFill(Color.RED);
                         GUInew.gc.fillOval(430, 152, 36, 36);
                         GUInew.gc.setFill(Color.BLACK);
-                        gc.fillText("X " + roodcount, 470, 175);
-                        gc.strokeRect(425, 295, 80, 70);
+                        GUInew.gc.fillText("X " + roodcount, 470, 175);
+                        GUInew.gc.strokeRect(425, 295, 80, 70);
                         GUInew.gc.setFill(Color.BLUE);
                         GUInew.gc.fillOval(430, 312, 36, 36);
                         GUInew.gc.setFill(Color.BLACK);
-                        gc.fillText("X " + blauwcount, 470, 335);
-                        gc.strokeRect(400, 55, 80, 70);
+                        GUInew.gc.fillText("X " + blauwcount, 470, 335);
+                        GUInew.gc.strokeRect(400, 55, 80, 70);
                         GUInew.gc.setFill(Color.YELLOW);
                         GUInew.gc.fillOval(405, 72, 36, 36);
                         GUInew.gc.setFill(Color.BLACK);
-                        gc.fillText("X " + geelcount, 445, 95);
-                        gc.strokeRect(400, 375, 80, 70);
-                        gc.fillText("RESTBAK", 410, 415);
+                        GUInew.gc.fillText("X " + geelcount, 445, 95);
+                        GUInew.gc.strokeRect(400, 375, 80, 70);
+                        GUInew.gc.fillText("Restbak", 410, 415);
                         Thread.sleep(20);
                     }
                 }
-            } catch (IOException e) {
-            } catch (InterruptedException ex) {
-                Logger.getLogger(Communicator1.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException | InterruptedException e) {
             }
         }
     }

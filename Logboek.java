@@ -21,7 +21,6 @@ public class Logboek {
             Database.PrepQueryLogbook(time, text);
         } catch (Exception e) {
             GUInew.getLogarea().appendText("ERROR: Database error, program can't function.\n");
-            GUInew.showError("Fatale fout opgetreden!", "Er kon geen connectie met de Database gemaakt worden. Het programma kan zo niet functioneren.");
         }
     }
 
