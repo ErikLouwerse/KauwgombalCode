@@ -162,6 +162,30 @@ public class GUInew extends Application {
         holder.getChildren().add(canvas);
         holder.setStyle("-fx-background-color: white");
         gc = canvas.getGraphicsContext2D();
+        gc.strokeRect(20, 200, 200, 100);
+        gc.strokeRect(220, 225, 200, 50);
+        gc.strokeRect(450, 215, 80, 70);
+        GUInew.gc.setFill(Color.GREEN);
+        GUInew.gc.fillOval(455, 232, 36, 36);
+        GUInew.gc.setFill(Color.BLACK);
+        gc.fillText("X 0", 495, 255);
+        gc.strokeRect(425, 135, 80, 70);
+        GUInew.gc.setFill(Color.RED);
+        GUInew.gc.fillOval(430, 152, 36, 36);
+        GUInew.gc.setFill(Color.BLACK);
+        gc.fillText("X 0", 470, 175);
+        gc.strokeRect(425, 295, 80, 70);
+        GUInew.gc.setFill(Color.BLUE);
+        GUInew.gc.fillOval(430, 312, 36, 36);
+        GUInew.gc.setFill(Color.BLACK);
+        gc.fillText("X 0", 470, 335);
+        gc.strokeRect(400, 55, 80, 70);
+        GUInew.gc.setFill(Color.YELLOW);
+        GUInew.gc.fillOval(405, 72, 36, 36);
+        GUInew.gc.setFill(Color.BLACK);
+        gc.fillText("X 0", 445, 95);
+        gc.strokeRect(400, 375, 80, 70);
+        gc.fillText("RESTBAK", 410, 415);
 
         loglabel = new Label("Logboek:");
 

@@ -14,7 +14,7 @@ public class Communicator2 implements SerialPortEventListener {
     SerialPort serialPort;
 
     //The port we're going to use.
-    private String PORT_NAME[] = { "COM6" };
+    private String PORT_NAME[] = { "COM5" };
 
     //A BufferedReader which will be fed by a InputStreamReader converting the bytes into characters
     BufferedReader input;

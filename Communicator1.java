@@ -11,14 +11,20 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static javaarduino.GUInew.gc;
 import javafx.scene.paint.Color;
 
 public class Communicator1 implements SerialPortEventListener {
 
+    private int blauwcount = 0;
+    private int geelcount = 0;
+    private int groencount = 0;
+    private int roodcount = 0;
+
     SerialPort serialPort;
 
     //The port we're going to use.
-    private String PORT_NAME[] = {"COM5"};
+    private String PORT_NAME[] = {"COM6"};
 
     //A BufferedReader which will be fed by a InputStreamReader converting the bytes into characters
     BufferedReader input;
@@ -80,35 +86,135 @@ public class Communicator1 implements SerialPortEventListener {
                 String inputLine = input.readLine();
                 Logboek.addRule(System.currentTimeMillis(), "(Arduino1): " + inputLine);
                 if (inputLine.equals("rood")) {
-                    GUInew.gc.setFill(Color.RED);
-                    for (int i = 0; i < 500; i = i + 2) {
+                    roodcount++;
+                    for (int i = 0; i < 500; i = i + 4) {
                         GUInew.gc.clearRect(0, 0, 5000, 5000);
-                        GUInew.gc.fillOval(20, i, 50, 50);
-                        Thread.sleep(10);
+                        GUInew.gc.setFill(Color.RED);
+                        GUInew.gc.fillOval(i, 232, 36, 36);
+                        gc.strokeRect(20, 200, 200, 100);
+                        gc.strokeRect(220, 225, 200, 50);
+                        gc.strokeRect(450, 215, 80, 70);
+                        GUInew.gc.setFill(Color.GREEN);
+                        GUInew.gc.fillOval(455, 232, 36, 36);
+                        GUInew.gc.setFill(Color.BLACK);
+                        gc.fillText("X " + groencount, 495, 255);
+                        gc.strokeRect(425, 135, 80, 70);
+                        GUInew.gc.setFill(Color.RED);
+                        GUInew.gc.fillOval(430, 152, 36, 36);
+                        GUInew.gc.setFill(Color.BLACK);
+                        gc.fillText("X " + roodcount, 470, 175);
+                        gc.strokeRect(425, 295, 80, 70);
+                        GUInew.gc.setFill(Color.BLUE);
+                        GUInew.gc.fillOval(430, 312, 36, 36);
+                        GUInew.gc.setFill(Color.BLACK);
+                        gc.fillText("X " + blauwcount, 470, 335);
+                        gc.strokeRect(400, 55, 80, 70);
+                        GUInew.gc.setFill(Color.YELLOW);
+                        GUInew.gc.fillOval(405, 72, 36, 36);
+                        GUInew.gc.setFill(Color.BLACK);
+                        gc.fillText("X " + geelcount, 445, 95);
+                        gc.strokeRect(400, 375, 80, 70);
+                        gc.fillText("RESTBAK", 410, 415);
+                        Thread.sleep(20);
                     }
                 }
                 if (inputLine.equals("geel")) {
-                    GUInew.gc.setFill(Color.YELLOW);
-                    for (int i = 0; i < 500; i = i + 2) {
+                    geelcount++;
+                    for (int i = 0; i < 500; i = i + 4) {
                         GUInew.gc.clearRect(0, 0, 5000, 5000);
-                        GUInew.gc.fillOval(20, i, 50, 50);
-                        Thread.sleep(10);
+                        GUInew.gc.setFill(Color.YELLOW);
+                        GUInew.gc.fillOval(i, 232, 36, 36);
+                        gc.strokeRect(20, 200, 200, 100);
+                        gc.strokeRect(220, 225, 200, 50);
+                        gc.strokeRect(450, 215, 80, 70);
+                        GUInew.gc.setFill(Color.GREEN);
+                        GUInew.gc.fillOval(455, 232, 36, 36);
+                        GUInew.gc.setFill(Color.BLACK);
+                        gc.fillText("X " + groencount, 495, 255);
+                        gc.strokeRect(425, 135, 80, 70);
+                        GUInew.gc.setFill(Color.RED);
+                        GUInew.gc.fillOval(430, 152, 36, 36);
+                        GUInew.gc.setFill(Color.BLACK);
+                        gc.fillText("X " + roodcount, 470, 175);
+                        gc.strokeRect(425, 295, 80, 70);
+                        GUInew.gc.setFill(Color.BLUE);
+                        GUInew.gc.fillOval(430, 312, 36, 36);
+                        GUInew.gc.setFill(Color.BLACK);
+                        gc.fillText("X " + blauwcount, 470, 335);
+                        gc.strokeRect(400, 55, 80, 70);
+                        GUInew.gc.setFill(Color.YELLOW);
+                        GUInew.gc.fillOval(405, 72, 36, 36);
+                        GUInew.gc.setFill(Color.BLACK);
+                        gc.fillText("X " + geelcount, 445, 95);
+                        gc.strokeRect(400, 375, 80, 70);
+                        gc.fillText("RESTBAK", 410, 415);
+                        Thread.sleep(20);
                     }
                 }
                 if (inputLine.equals("blauw")) {
-                    GUInew.gc.setFill(Color.BLUE);
-                    for (int i = 0; i < 500; i = i + 2) {
+                    blauwcount++;
+                    for (int i = 0; i < 500; i = i + 4) {
                         GUInew.gc.clearRect(0, 0, 5000, 5000);
-                        GUInew.gc.fillOval(20, i, 50, 50);
-                        Thread.sleep(10);
+                        GUInew.gc.setFill(Color.BLUE);
+                        GUInew.gc.fillOval(i, 232, 36, 36);
+                        gc.strokeRect(20, 200, 200, 100);
+                        gc.strokeRect(220, 225, 200, 50);
+                        gc.strokeRect(450, 215, 80, 70);
+                        GUInew.gc.setFill(Color.GREEN);
+                        GUInew.gc.fillOval(455, 232, 36, 36);
+                        GUInew.gc.setFill(Color.BLACK);
+                        gc.fillText("X " + groencount, 495, 255);
+                        gc.strokeRect(425, 135, 80, 70);
+                        GUInew.gc.setFill(Color.RED);
+                        GUInew.gc.fillOval(430, 152, 36, 36);
+                        GUInew.gc.setFill(Color.BLACK);
+                        gc.fillText("X " + roodcount, 470, 175);
+                        gc.strokeRect(425, 295, 80, 70);
+                        GUInew.gc.setFill(Color.BLUE);
+                        GUInew.gc.fillOval(430, 312, 36, 36);
+                        GUInew.gc.setFill(Color.BLACK);
+                        gc.fillText("X " + blauwcount, 470, 335);
+                        gc.strokeRect(400, 55, 80, 70);
+                        GUInew.gc.setFill(Color.YELLOW);
+                        GUInew.gc.fillOval(405, 72, 36, 36);
+                        GUInew.gc.setFill(Color.BLACK);
+                        gc.fillText("X " + geelcount, 445, 95);
+                        gc.strokeRect(400, 375, 80, 70);
+                        gc.fillText("RESTBAK", 410, 415);
+                        Thread.sleep(20);
                     }
                 }
                 if (inputLine.equals("groen")) {
-                    GUInew.gc.setFill(Color.GREEN);
-                    for (int i = 0; i < 500; i = i + 2) {
+                    groencount++;
+                    for (int i = 0; i < 455; i = i + 4) {
                         GUInew.gc.clearRect(0, 0, 5000, 5000);
-                        GUInew.gc.fillOval(20, i, 50, 50);
-                        Thread.sleep(10);
+                        GUInew.gc.setFill(Color.GREEN);
+                        GUInew.gc.fillOval(i, 232, 36, 36);
+                        gc.strokeRect(20, 200, 200, 100);
+                        gc.strokeRect(220, 225, 200, 50);
+                        gc.strokeRect(450, 215, 80, 70);
+                        GUInew.gc.setFill(Color.GREEN);
+                        GUInew.gc.fillOval(455, 232, 36, 36);
+                        GUInew.gc.setFill(Color.BLACK);
+                        gc.fillText("X " + groencount, 495, 255);
+                        gc.strokeRect(425, 135, 80, 70);
+                        GUInew.gc.setFill(Color.RED);
+                        GUInew.gc.fillOval(430, 152, 36, 36);
+                        GUInew.gc.setFill(Color.BLACK);
+                        gc.fillText("X " + roodcount, 470, 175);
+                        gc.strokeRect(425, 295, 80, 70);
+                        GUInew.gc.setFill(Color.BLUE);
+                        GUInew.gc.fillOval(430, 312, 36, 36);
+                        GUInew.gc.setFill(Color.BLACK);
+                        gc.fillText("X " + blauwcount, 470, 335);
+                        gc.strokeRect(400, 55, 80, 70);
+                        GUInew.gc.setFill(Color.YELLOW);
+                        GUInew.gc.fillOval(405, 72, 36, 36);
+                        GUInew.gc.setFill(Color.BLACK);
+                        gc.fillText("X " + geelcount, 445, 95);
+                        gc.strokeRect(400, 375, 80, 70);
+                        gc.fillText("RESTBAK", 410, 415);
+                        Thread.sleep(20);
                     }
                 }
             } catch (IOException e) {
