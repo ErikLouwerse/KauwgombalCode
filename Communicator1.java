@@ -25,7 +25,11 @@ public class Communicator1 implements SerialPortEventListener {
     static int bakroodcount = 0;
     static int pakjes = 0;
     private int r = 200;
-
+    static int baan1 = 450;
+    static int baan2 = 225;
+    static int baan3 = 275;
+    static boolean animatie = false;
+    
     SerialPort serialPort;
 
     //The port we're going to use.
@@ -88,28 +92,28 @@ public class Communicator1 implements SerialPortEventListener {
             GUInew.gc.strokeRect(20, 200, 200, 100);
 
             //Groene bakje, bal en counter
-            GUInew.gc.strokeRect(450, 215, 80, 70);
+            GUInew.gc.strokeRect(450, 215, 85, 70);
             GUInew.gc.setFill(Color.GREEN);
             GUInew.gc.fillOval(455, 232, 36, 36);
             GUInew.gc.setFill(Color.BLACK);
             GUInew.gc.fillText("X " + groencount, 495, 255);
 
             //Rode bakje, bal en counter
-            GUInew.gc.strokeRect(425, 135, 80, 70);
+            GUInew.gc.strokeRect(425, 135, 85, 70);
             GUInew.gc.setFill(Color.RED);
             GUInew.gc.fillOval(430, 152, 36, 36);
             GUInew.gc.setFill(Color.BLACK);
             GUInew.gc.fillText("X " + roodcount, 470, 175);
 
             //Blauwe bakje, bal en counter
-            GUInew.gc.strokeRect(425, 295, 80, 70);
+            GUInew.gc.strokeRect(425, 295, 85, 70);
             GUInew.gc.setFill(Color.BLUE);
             GUInew.gc.fillOval(430, 312, 36, 36);
             GUInew.gc.setFill(Color.BLACK);
             GUInew.gc.fillText("X " + blauwcount, 470, 335);
 
             //Gele bakje, bal en counter
-            GUInew.gc.strokeRect(400, 55, 80, 70);
+            GUInew.gc.strokeRect(400, 55, 85, 70);
             GUInew.gc.setFill(Color.YELLOW);
             GUInew.gc.fillOval(405, 72, 36, 36);
             GUInew.gc.setFill(Color.BLACK);
@@ -143,10 +147,10 @@ public class Communicator1 implements SerialPortEventListener {
             GUInew.gc.fillOval(925, 165, 36, 36);
             GUInew.gc.setFill(Color.BLACK);
             GUInew.gc.fillText("X " + bakgeelcount, 965, 190);
-            
+
             //Pakketjes klaar teller
-            if (pakjes > 0){
-            GUInew.gc.fillText("Aantal pakketjes klaar:  " + pakjes, 1250, 210);
+            if (pakjes > 0) {
+                GUInew.gc.fillText("Aantal pakketjes klaar:  " + pakjes, 1200, 210);
             } else {
                 GUInew.gc.fillText("Aantal pakketjes klaar: 0", 1200, 210);
             }
@@ -164,32 +168,20 @@ public class Communicator1 implements SerialPortEventListener {
             try {
                 String inputLine = input.readLine();
                 Logboek.addRule(System.currentTimeMillis(), "(Arduino1): " + inputLine);
-                if (inputLine.equals("rood")) {
-                    for (int i = 0; i < 200; i = i + 4) {
-                        GUInew.gc.clearRect(0, 0, 5000, 5000);
-                        GUInew.gc.setFill(Color.RED);
-                        GUInew.gc.fillOval(i, 232, 36, 36);
-                        GUInew.gc.strokeLine(220, 225, 425, 145);
-                        GUInew.gc.strokeLine(220, 275, 425, 195);
-                        drawMachine();
-                    }
-                    for (double i = 0; i < 80; i = i + 1.5) {
-                        r = r + 4;
-                        GUInew.gc.clearRect(0, 0, 5000, 5000);
-                        GUInew.gc.setFill(Color.RED);
-                        GUInew.gc.fillOval(r + 4, 232 - i, 36, 36);
-                        GUInew.gc.strokeLine(220, 225, 425, 145);
-                        GUInew.gc.strokeLine(220, 275, 425, 195);
-                        drawMachine();
-                    }
-                    roodcount++;
-                    r = 200;
-                }
                 if (inputLine.equals("geel")) {
+                    Communicator2.output.write(204);
+                    animatie = true;
+                    baan1 = 400;
+                    baan2 = 70;
+                    baan3 = 120;
                     for (int i = 0; i < 200; i = i + 4) {
                         GUInew.gc.clearRect(0, 0, 5000, 5000);
                         GUInew.gc.setFill(Color.YELLOW);
                         GUInew.gc.fillOval(i, 232, 36, 36);
+                        if (Communicator2.animatie == true) {
+                            GUInew.gc.setFill(Communicator2.kleur);
+                            GUInew.gc.fillOval(Communicator2.bal1, Communicator2.bal2, 36, 36);
+                        }
                         GUInew.gc.strokeLine(220, 225, 400, 70);
                         GUInew.gc.strokeLine(220, 275, 400, 120);
                         drawMachine();
@@ -199,18 +191,94 @@ public class Communicator1 implements SerialPortEventListener {
                         GUInew.gc.clearRect(0, 0, 5000, 5000);
                         GUInew.gc.setFill(Color.YELLOW);
                         GUInew.gc.fillOval(r + 4, 232 - i, 36, 36);
+                        if (Communicator2.animatie == true) {
+                            GUInew.gc.setFill(Communicator2.kleur);
+                            GUInew.gc.fillOval(Communicator2.bal1, Communicator2.bal2, 36, 36);
+                        }
                         GUInew.gc.strokeLine(220, 225, 400, 70);
                         GUInew.gc.strokeLine(220, 275, 400, 120);
                         drawMachine();
                     }
+                    Database.UpdateQuery("geel");
                     geelcount++;
+                    Communicator2.geelBak++;
                     r = 200;
+                    animatie = false;
+                }
+                if (inputLine.equals("rood")) {
+                    Communicator2.output.write(205);
+                    animatie = true;
+                    baan1 = 425;
+                    baan2 = 145;
+                    baan3 = 195;
+                    for (int i = 0; i < 200; i = i + 4) {
+                        GUInew.gc.clearRect(0, 0, 5000, 5000);
+                        GUInew.gc.setFill(Color.RED);
+                        GUInew.gc.fillOval(i, 232, 36, 36);
+                        if (Communicator2.animatie == true) {
+                            GUInew.gc.setFill(Communicator2.kleur);
+                            GUInew.gc.fillOval(Communicator2.bal1, Communicator2.bal2, 36, 36);
+                        }
+                        GUInew.gc.strokeLine(220, 225, 425, 145);
+                        GUInew.gc.strokeLine(220, 275, 425, 195);
+                        drawMachine();
+                    }
+                    for (double i = 0; i < 80; i = i + 1.5) {
+                        r = r + 4;
+                        GUInew.gc.clearRect(0, 0, 5000, 5000);
+                        GUInew.gc.setFill(Color.RED);
+                        GUInew.gc.fillOval(r + 4, 232 - i, 36, 36);
+                        if (Communicator2.animatie == true) {
+                            GUInew.gc.setFill(Communicator2.kleur);
+                            GUInew.gc.fillOval(Communicator2.bal1, Communicator2.bal2, 36, 36);
+                        }
+                        GUInew.gc.strokeLine(220, 225, 425, 145);
+                        GUInew.gc.strokeLine(220, 275, 425, 195);
+                        drawMachine();
+                    }
+                    Database.UpdateQuery("rood");
+                    roodcount++;
+                    Communicator2.roodBak++;
+                    r = 200;
+                    animatie = false;
+                }
+                if (inputLine.equals("groen")) {
+                    Communicator2.output.write(206);
+                    animatie = true;
+                    baan1 = 450;
+                    baan2 = 225;
+                    baan3 = 275;
+                    for (int i = 0; i < 455; i = i + 4) {
+                        GUInew.gc.clearRect(0, 0, 5000, 5000);
+                        GUInew.gc.setFill(Color.GREEN);
+                        GUInew.gc.fillOval(i, 232, 36, 36);
+                        if (Communicator2.animatie == true) {
+                            GUInew.gc.setFill(Communicator2.kleur);
+                            GUInew.gc.fillOval(Communicator2.bal1, Communicator2.bal2, 36, 36);
+                        }
+                        GUInew.gc.strokeLine(220, 225, 450, 225);
+                        GUInew.gc.strokeLine(220, 275, 450, 275);
+                        drawMachine();
+                    }
+                    Database.UpdateQuery("groen");
+                    groencount++;
+                    Communicator2.groenBak++;
+                    animatie = false;
                 }
                 if (inputLine.equals("blauw")) {
+                    Communicator2.output.write(207);
+                    animatie = true;
+                    baan1 = 425;
+                    baan2 = 305;
+                    baan3 = 355;
                     for (int i = 0; i < 200; i = i + 4) {
                         GUInew.gc.clearRect(0, 0, 5000, 5000);
                         GUInew.gc.setFill(Color.BLUE);
                         GUInew.gc.fillOval(i, 232, 36, 36);
+                        if (Communicator2.animatie == true) {
+                            GUInew.gc.setFill(Communicator2.kleur);
+                            GUInew.gc.fillOval(Communicator2.bal1, Communicator2.bal2, 36, 36);
+                        }
                         GUInew.gc.strokeLine(220, 225, 425, 305);
                         GUInew.gc.strokeLine(220, 275, 425, 355);
                         drawMachine();
@@ -220,25 +288,21 @@ public class Communicator1 implements SerialPortEventListener {
                         GUInew.gc.clearRect(0, 0, 5000, 5000);
                         GUInew.gc.setFill(Color.BLUE);
                         GUInew.gc.fillOval(r + 4, 232 + i, 36, 36);
+                        if (Communicator2.animatie == true) {
+                            GUInew.gc.setFill(Communicator2.kleur);
+                            GUInew.gc.fillOval(Communicator2.bal1, Communicator2.bal2, 36, 36);
+                        }
                         GUInew.gc.strokeLine(220, 225, 425, 305);
                         GUInew.gc.strokeLine(220, 275, 425, 355);
                         drawMachine();
                     }
                     r = 200;
+                    Database.UpdateQuery("blauw");
+                    Communicator2.blauwBak++;
                     blauwcount++;
+                    animatie = false;
                 }
-                if (inputLine.equals("groen")) {
-                    for (int i = 0; i < 455; i = i + 4) {
-                        GUInew.gc.clearRect(0, 0, 5000, 5000);
-                        GUInew.gc.setFill(Color.GREEN);
-                        GUInew.gc.fillOval(i, 232, 36, 36);
-                        GUInew.gc.strokeLine(220, 225, 450, 225);
-                        GUInew.gc.strokeLine(220, 275, 450, 275);
-                        drawMachine();
-                    }
-                    groencount++;
-                }
-            } catch (IOException e) {
+            } catch (Exception e) {
             }
         }
     }

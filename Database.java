@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Database {
+
     private static Connection con = null;
     private static String host = "104.199.31.189";
     private static String dbname = "kauwgombal";
@@ -21,8 +22,8 @@ public class Database {
 
     private static Connection getNewConnection() {
         try {
-            con = DriverManager.getConnection("jdbc:mysql://"+ host +":3306/"+ dbname +"?useSSL=false", username, password);
-        } catch(Exception e) {
+            con = DriverManager.getConnection("jdbc:mysql://" + host + ":3306/" + dbname + "?useSSL=false", username, password);
+        } catch (Exception e) {
             System.out.println("Error while trying to get a new Database connection!");
         }
         return con;
@@ -32,7 +33,7 @@ public class Database {
         List<Integer> values = new ArrayList<>();
         Connection con = getConnection();
         try (Statement stmt = con.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT * FROM `transacties` WHERE Transactienummer = (SELECT MAX(Transactienummer) FROM `transacties`)")) {
+                ResultSet rs = stmt.executeQuery("SELECT * FROM `transacties` WHERE Transactienummer = (SELECT MAX(Transactienummer) FROM `transacties`)")) {
             while (rs.next()) {
                 int yellow = rs.getInt("Geel");
                 int red = rs.getInt("Rood");
@@ -61,6 +62,46 @@ public class Database {
         }
     }
 
+    static void Query(String query) {
+        Connection con = getConnection();
+        try (Statement stmt = con.createStatement();
+                ResultSet rs = stmt.executeQuery(query)) {
+            rs.next();
+            setGeelBak(rs.getInt("Aantal"));
+            rs.next();
+            setRoodBak(rs.getInt("Aantal"));
+            rs.next();
+            setGroenBak(rs.getInt("Aantal"));
+            rs.next();
+            setBlauwBak(rs.getInt("Aantal"));
+
+        } catch (Exception e) {
+
+        }
+
+    }
+
+    static void UpdateQuery(String kleur) {
+        Connection con = getConnection();
+        try {
+        if (kleur.equals("geel")) {
+            PreparedStatement s = con.prepareStatement("Update aantal_ballen set Aantal = Aantal+1 where Naam = 'Geel'");
+            s.executeUpdate();
+        } else if (kleur.equals("rood")) {
+            PreparedStatement s = con.prepareStatement("Update aantal_ballen set Aantal = Aantal+1 where Naam = 'Rood'");
+            s.executeUpdate();
+        } else if (kleur.equals("groen")) {
+            PreparedStatement s = con.prepareStatement("Update aantal_ballen set Aantal = Aantal+1 where Naam = 'Groen'");
+            s.executeUpdate();
+        } else if (kleur.equals("blauw")) {
+            PreparedStatement s = con.prepareStatement("Update aantal_ballen set Aantal = Aantal+1 where Naam = 'Blauw'");
+            s.executeUpdate();
+        }
+        } catch (SQLException e){
+            System.out.println(e);
+        }
+    }
+
     static void PrepQuery(String query, int yellow, int red, int green, int blue, int quantity, boolean dispose, int speed) {
         Connection con = getConnection();
         try (PreparedStatement s = con.prepareStatement(query)) {
@@ -81,7 +122,7 @@ public class Database {
         StringBuilder sb = new StringBuilder();
         Connection con = getConnection();
         try (Statement stmt = con.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT * FROM `logboek` ORDER BY Tijd DESC LIMIT " + amount)) {
+                ResultSet rs = stmt.executeQuery("SELECT * FROM `logboek` ORDER BY Tijd DESC LIMIT " + amount)) {
             while (rs.next()) {
                 long dbtime = rs.getLong("Tijd");
                 String text = rs.getString("Activiteit");
@@ -92,5 +133,21 @@ public class Database {
             System.out.println("Error: No connection with Database!");
         }
         return sb.toString();
+    }
+
+    private static void setGeelBak(int geelBak) {
+        Communicator2.geelBak = geelBak;
+    }
+
+    private static void setRoodBak(int roodBak) {
+        Communicator2.roodBak = roodBak;
+    }
+
+    private static void setGroenBak(int groenBak) {
+        Communicator2.groenBak = groenBak;
+    }
+
+    private static void setBlauwBak(int blauwBak) {
+        Communicator2.blauwBak = blauwBak;
     }
 }

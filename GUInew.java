@@ -27,6 +27,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class GUInew extends Application {
 
@@ -161,7 +163,6 @@ public class GUInew extends Application {
         holder.setStyle("-fx-background-color: white");
         gc = canvas.getGraphicsContext2D();
         drawSetup();
-
         loglabel = new Label("Logboek:");
 
         logarea = new TextArea("");
@@ -239,51 +240,9 @@ public class GUInew extends Application {
     }
 
     private void drawSetup() {
-        //Kleuren sorteermachine en startpositie glijbaan
-        gc.strokeRect(20, 200, 200, 100);
-        gc.strokeLine(220,225, 450, 225);
-        gc.strokeLine(220,275, 450, 275);
-
-        //Groene bakje, bal en counter
-        gc.strokeRect(450, 215, 80, 70);
-        gc.setFill(Color.GREEN);
-        gc.fillOval(455, 232, 36, 36);
-        gc.setFill(Color.BLACK);
-        gc.fillText("X 0", 495, 255);
-
-        //Rode bakje, bal en counter
-        gc.strokeRect(425, 135, 80, 70);
-        gc.setFill(Color.RED);
-        gc.fillOval(430, 152, 36, 36);
-        gc.setFill(Color.BLACK);
-        gc.fillText("X 0", 470, 175);
-
-        //Blauwe bakje, bal en counter
-        gc.strokeRect(425, 295, 80, 70);
-        gc.setFill(Color.BLUE);
-        gc.fillOval(430, 312, 36, 36);
-        gc.setFill(Color.BLACK);
-        gc.fillText("X 0", 470, 335);
-
-        //Gele bakje, bal en counter
-        gc.strokeRect(400, 55, 80, 70);
-        gc.setFill(Color.YELLOW);
-        gc.fillOval(405, 72, 36, 36);
-        gc.setFill(Color.BLACK);
-        gc.fillText("X 0", 445, 95);
-
-        //Restbakje
-        gc.strokeRect(400, 375, 80, 70);
-        gc.fillText("Restbak", 410, 415);
-
-        //Trechter
-        gc.strokeLine(550,55, 800, 185);
-        gc.strokeLine(550,365, 800, 235);
-        gc.strokeLine(800,185, 870, 185);
-        gc.strokeLine(800,235, 870, 235);
-
-        //Eindbakje
-        gc.strokeRect(900, 180, 320, 280);
+        Communicator1.drawMachine();
+        gc.strokeLine(220, 225, 450, 225);
+        gc.strokeLine(220, 275, 450, 275);
     }
 
     static void showInfo(String header, String text) {
@@ -312,6 +271,7 @@ public class GUInew extends Application {
 
     //============================== EVENT LISTENER CLASS ======================================
     private class GUIbuttonListener implements EventHandler<ActionEvent> {
+
         @Override
         public void handle(ActionEvent event) {
             if (event.getSource() == savebutton) {
@@ -323,6 +283,13 @@ public class GUInew extends Application {
                 Logboek.addRule(System.currentTimeMillis(), "Previous settings reverted");
                 showInfo("Instellingen teruggezet", "De vorige instellingen zijn teruggezet. Vergeet niet om nog op Save te klikken!");
             } else if (event.getSource() == startbtn) {
+                try {
+                    Communicator2.output.write(Communicator2.geelBak + 100);
+                    Communicator2.output.write(Communicator2.roodBak + 100);
+                    Communicator2.output.write(Communicator2.groenBak + 100);
+                    Communicator2.output.write(Communicator2.blauwBak + 100);
+                } catch (IOException ex) {
+                }
                 Logboek.addRule(System.currentTimeMillis(), "Start button pressed");
             } else if (event.getSource() == stopbtn) {
                 Logboek.addRule(System.currentTimeMillis(), "Stop button pressed");
