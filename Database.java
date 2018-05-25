@@ -24,7 +24,7 @@ public class Database {
         try {
             con = DriverManager.getConnection("jdbc:mysql://" + host + ":3306/" + dbname + "?useSSL=false", username, password);
         } catch (Exception e) {
-            System.out.println("Error while trying to get a new Database connection!");
+            System.out.println("Error: niet gelukt om te connecten met Database!");
         }
         return con;
     }
@@ -41,12 +41,11 @@ public class Database {
                 int blue = rs.getInt("Blauw");
                 int quantity = rs.getInt("Aantal pakketten");
                 int dispose = rs.getInt("Afvoeren");
-                int speed = rs.getInt("Snelheid");
-                List<Integer> numbers = Arrays.asList(yellow, red, green, blue, quantity, dispose, speed);
+                List<Integer> numbers = Arrays.asList(yellow, red, green, blue, quantity, dispose);
                 values.addAll(numbers);
             }
         } catch (SQLException e) {
-            System.out.println("Error: No connection with Database!");
+            System.out.println("Error: Geen connectie met Database!");
         }
         return values;
     }
@@ -58,7 +57,7 @@ public class Database {
             s.setString(2, text);
             s.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error: No connection with Database!");
+            System.out.println("Error: Geen connectie met Database!");
         }
     }
 
@@ -94,7 +93,7 @@ public class Database {
         }
     }
 
-    static void PrepQuery(String query, int yellow, int red, int green, int blue, int quantity, boolean dispose, int speed) {
+    static void PrepQuery(String query, int yellow, int red, int green, int blue, int quantity, boolean dispose) {
         Connection con = getConnection();
         try (PreparedStatement s = con.prepareStatement(query)) {
             s.setInt(1, yellow);
@@ -103,10 +102,9 @@ public class Database {
             s.setInt(4, blue);
             s.setInt(5, quantity);
             s.setBoolean(6, dispose);
-            s.setInt(7, speed);
             s.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error: No connection with Database!");
+            System.out.println("Error: Geen connectie met Database!");
         }
     }
 
@@ -122,7 +120,7 @@ public class Database {
                 sb.append("[").append(time).append("]  ").append(text).append("\n");
             }
         } catch (SQLException e) {
-            System.out.println("Error: No connection with Database!");
+            System.out.println("Error: Geen connectie met Database!");
         }
         return sb.toString();
     }

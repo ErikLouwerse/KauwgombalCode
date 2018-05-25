@@ -39,13 +39,12 @@ public class GUInew extends Application {
     private static Communicator2 Communicator2;
     private GridPane root, left, right, quantities, leftbuttonpane;
     private VBox vboxleft, vboxright;
-    private Label settingstext, speedlabel, yellowballlabel, redballlabel, greenballlabel, blueballlabel, packageslabel,
+    private Label settingstext, yellowballlabel, redballlabel, greenballlabel, blueballlabel, packageslabel,
             statuslabel, loglabel;
     private TextField yellowballfield, redballfield, greenballfield, blueballfield, packagesfield;
     private static TextArea logarea;
     private Line blackLine;
     private CheckBox dispose;
-    private Slider slider;
     private Button savebutton, prevsettingsbutton, logbtn, startbtn, stopbtn, resetbtn;
     private GUIbuttonListener listener;
 
@@ -91,19 +90,6 @@ public class GUInew extends Application {
         dispose = new CheckBox("Onnodige ballen apart leggen");
         dispose.setOnAction(listener);
 
-        speedlabel = new Label("Snelheid:");
-
-        slider = new Slider();
-        slider.setMin(1);
-        slider.setMax(3);
-        slider.setValue(2);
-        slider.setBlockIncrement(1);
-        slider.setShowTickLabels(true);
-        slider.setShowTickMarks(true);
-        slider.setMajorTickUnit(1);
-        slider.setMinorTickCount(0);
-        slider.setSnapToTicks(true);
-
         yellowballlabel = new Label("Aantal gele ballen:");
         redballlabel = new Label("Aantal rode ballen:");
         greenballlabel = new Label("Aantal groene ballen:");
@@ -144,7 +130,7 @@ public class GUInew extends Application {
         leftbuttonpane.addColumn(0, savebutton);
         leftbuttonpane.addColumn(1, prevsettingsbutton);
 
-        vboxleft.getChildren().addAll(settingstext, blackLine, dispose, speedlabel, slider, quantities, leftbuttonpane);
+        vboxleft.getChildren().addAll(settingstext, blackLine, dispose, quantities, leftbuttonpane);
         left.getChildren().addAll(vboxleft);
         //=============================== END LEFT =====================================
 
@@ -301,6 +287,8 @@ public class GUInew extends Application {
                 Communicator1.initialize();
                 Communicator2.initialize();
                 stop = false;
+                stopbtn.setDisable(false);
+                startbtn.setDisable(true);
                 Logboek.addRule(System.currentTimeMillis(), "Start button pressed");
                 try {
                     Thread.sleep(2000);
@@ -315,6 +303,8 @@ public class GUInew extends Application {
                     Communicator1.output.write(255);
                     Communicator2.output.write(255);
                     stop = true;
+                    stopbtn.setDisable(true);
+                    startbtn.setDisable(false);
                 } catch (IOException ex) {
                     Logger.getLogger(GUInew.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -343,7 +333,6 @@ public class GUInew extends Application {
 
         private void saveSettings() {
             boolean disposevalue = dispose.isSelected();
-            int speedvalue = (int) slider.getValue();
             int yellowcount = -1, redcount = -1, greencount = -1, bluecount = -1, quantitycount = -1;
             try {
                 yellowcount = Integer.parseInt(yellowballfield.getText());
@@ -376,7 +365,7 @@ public class GUInew extends Application {
                         Communicator1.output.write(redcount);
                         Communicator1.output.write(greencount);
                         Communicator1.output.write(bluecount);
-                        //Communicator1.output.write(quantitycount);
+                        Communicator1.output.write(quantitycount);
                         
                         Logboek.addRule(System.currentTimeMillis(), "Quantities successfully sent to Arduino2");
                     } catch (Exception e) {
@@ -386,7 +375,7 @@ public class GUInew extends Application {
                     try {
                         Logboek.addRule(System.currentTimeMillis(), "Saving settings to Database");
                         Database.PrepQuery("INSERT INTO `transacties` (`Transactienummer`, `Geel`, `Rood`, `Groen`, `Blauw`, `Aantal pakketten`, `Afvoeren`, `Snelheid`) "
-                                + "SELECT MAX(Transactienummer)+1,?,?,?,?,?,?,? FROM transacties", yellowcount, redcount, greencount, bluecount, quantitycount, disposevalue, speedvalue);
+                                + "SELECT MAX(Transactienummer)+1,?,?,?,?,?,?,? FROM transacties", yellowcount, redcount, greencount, bluecount, quantitycount, disposevalue);
                         Logboek.addRule(System.currentTimeMillis(), "Settings successfully saved to Database");
                         showInfo("Opgeslagen", "De instellingen zijn succesvol in de Database opgeslagen!");
                     } catch (Exception e) {
@@ -403,7 +392,6 @@ public class GUInew extends Application {
 
         private void revertSettings() {
             boolean dbdispose = false;
-            double dbspeed = 2.0;
             int dbyellow = 0, dbred = 0, dbgreen = 0, dbblue = 0, dbpackages = 0;
             List<Integer> dbvalues = Database.QueryPrevSettings();
             dbyellow = dbvalues.get(0);
@@ -414,9 +402,7 @@ public class GUInew extends Application {
             if (dbvalues.get(5) == 1) {
                 dbdispose = true;
             }
-            dbspeed = dbvalues.get(6);
             dispose.setSelected(dbdispose);
-            slider.setValue(dbspeed);
             yellowballfield.setText(String.valueOf(dbyellow));
             redballfield.setText(String.valueOf(dbred));
             greenballfield.setText(String.valueOf(dbgreen));

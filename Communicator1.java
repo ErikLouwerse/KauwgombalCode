@@ -172,13 +172,13 @@ public class Communicator1 implements SerialPortEventListener {
                 Logboek.addRule(System.currentTimeMillis(), "(Arduino1): " + inputLine);
                 if (inputLine.equals("200")) {
                     connection = true;
-//                    try {
-//                        output.write(geelcount + 100);
-//                        output.write(roodcount + 100);
-//                        output.write(groencount + 100);
-//                        output.write(blauwcount + 100);
-//                    } catch (IOException ex) {
-//                    }
+                    try {
+                        output.write(geelcount + 100);
+                        output.write(roodcount + 100);
+                        output.write(groencount + 100);
+                        output.write(blauwcount + 100);
+                    } catch (IOException ex) {
+                    }
                 }
                 if (inputLine.equals("geel")) {
                     if (Communicator2.connection == true) {

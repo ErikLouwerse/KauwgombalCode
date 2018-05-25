@@ -139,9 +139,6 @@ public class Communicator2 implements SerialPortEventListener {
                     GUInew.gc.clearRect(0, 0, 5000, 5000);
                     drawSetup();
                     animatie = false;
-                    if (GUInew.stop == true){
-                        serialPort.close();
-                    }
                 }
                 if (inputLine.equals("Dropping red ball")) {
                     kleur = Color.RED;
@@ -177,9 +174,6 @@ public class Communicator2 implements SerialPortEventListener {
                     GUInew.gc.clearRect(0, 0, 5000, 5000);
                     drawSetup();
                     animatie = false;
-                    if (GUInew.stop == true){
-                        serialPort.close();
-                    }
                 }
                 if (inputLine.equals("Dropping green ball")) {
                     kleur = Color.GREEN;
@@ -216,9 +210,6 @@ public class Communicator2 implements SerialPortEventListener {
                     GUInew.gc.clearRect(0, 0, 5000, 5000);
                     drawSetup();
                     animatie = false;
-                    if (GUInew.stop == true){
-                        serialPort.close();
-                    }
                 }
                 if (inputLine.equals("Dropping blue ball")) {
                     kleur = Color.BLUE;
@@ -254,9 +245,6 @@ public class Communicator2 implements SerialPortEventListener {
                     GUInew.gc.clearRect(0, 0, 5000, 5000);
                     drawSetup();
                     animatie = false;
-                    if (GUInew.stop == true){
-                        serialPort.close();
-                    }
                 }
                 if (inputLine.equals("Pakje klaar!")) {
                     Communicator1.pakjes = Communicator1.pakjes + 1;
