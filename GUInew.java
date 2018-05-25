@@ -34,6 +34,7 @@ public class GUInew extends Application {
 
     static GraphicsContext gc;
 
+    static boolean stop;
     private static Communicator1 Communicator1;
     private static Communicator2 Communicator2;
     private GridPane root, left, right, quantities, leftbuttonpane;
@@ -45,14 +46,12 @@ public class GUInew extends Application {
     private Line blackLine;
     private CheckBox dispose;
     private Slider slider;
-    private Button savebutton, prevsettingsbutton, logbtn, startbtn, stopbtn;
+    private Button savebutton, prevsettingsbutton, logbtn, startbtn, stopbtn, resetbtn;
     private GUIbuttonListener listener;
 
     public static void main(String[] args) {
         Communicator1 = new Communicator1();
         Communicator2 = new Communicator2();
-        Communicator1.initialize();
-        Communicator2.initialize();
         launch(args);
     }
 
@@ -176,6 +175,10 @@ public class GUInew extends Application {
         startbtn.setText("  Start  ");
         startbtn.setOnAction(listener);
 
+        resetbtn = new Button();
+        resetbtn.setText("  Reset Balls  ");
+        resetbtn.setOnAction(listener);
+
         stopbtn = new Button();
         stopbtn.setText("  Stop  ");
         stopbtn.setOnAction(listener);
@@ -184,7 +187,7 @@ public class GUInew extends Application {
         HBox startstopbuttons = new HBox();
         startstopbuttons.setSpacing(15);
         startstopbuttons.setAlignment(Pos.BOTTOM_RIGHT);
-        startstopbuttons.getChildren().addAll(startbtn, stopbtn);
+        startstopbuttons.getChildren().addAll(startbtn, resetbtn, stopbtn);
         HBox logbookbutton = new HBox();
         logbookbutton.setAlignment(Pos.BOTTOM_LEFT);
         logbookbutton.getChildren().addAll(logbtn);
@@ -283,16 +286,56 @@ public class GUInew extends Application {
                 Logboek.addRule(System.currentTimeMillis(), "Previous settings reverted");
                 showInfo("Instellingen teruggezet", "De vorige instellingen zijn teruggezet. Vergeet niet om nog op Save te klikken!");
             } else if (event.getSource() == startbtn) {
-                try {
-                    Communicator2.output.write(Communicator2.geelBak + 100);
-                    Communicator2.output.write(Communicator2.roodBak + 100);
-                    Communicator2.output.write(Communicator2.groenBak + 100);
-                    Communicator2.output.write(Communicator2.blauwBak + 100);
-                } catch (IOException ex) {
+                if (Communicator1.connection == true && Communicator2.connection == true) {
+                    try {
+                        Communicator1.input.close();
+                        Communicator1.output.close();
+                        Communicator1.serialPort.close();
+                        Communicator2.input.close();
+                        Communicator2.output.close();
+                        Communicator2.serialPort.close();
+                    } catch (IOException ex) {
+                        Logger.getLogger(GUInew.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
+                Communicator1.initialize();
+                Communicator2.initialize();
+                stop = false;
                 Logboek.addRule(System.currentTimeMillis(), "Start button pressed");
+                try {
+                    Thread.sleep(2000);
+                    Communicator1.output.write(200);
+                    Communicator2.output.write(201);
+                } catch (IOException ex) {
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(GUInew.class.getName()).log(Level.SEVERE, null, ex);
+                }
             } else if (event.getSource() == stopbtn) {
+                try {
+                    Communicator1.output.write(255);
+                    Communicator2.output.write(255);
+                    stop = true;
+                } catch (IOException ex) {
+                    Logger.getLogger(GUInew.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 Logboek.addRule(System.currentTimeMillis(), "Stop button pressed");
+            } else if (event.getSource() == resetbtn) {
+                Database.UpdateQuery("Update aantal_ballen set Aantal = 0");
+                setGeelcount(0);
+                setGeelBak(0);
+                setRoodcount(0);
+                setRoodBak(0);
+                setGroencount(0);
+                setGroenBak(0);
+                setBlauwcount(0);
+                setBlauwBak(0);
+                if (Communicator2.connection == true) {
+                    try {
+                        Communicator2.output.write(214);
+                    } catch (IOException ex) {
+                        Logger.getLogger(GUInew.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
             } else if (event.getSource() == logbtn) {
                 showLogbookDialog();
             }
@@ -323,6 +366,18 @@ public class GUInew extends Application {
                         Communicator2.GreenBalls(greencount);
                         Communicator2.BlueBalls(bluecount);
                         Communicator2.QuantityPackage(quantitycount);
+                        if (disposevalue == false){
+                            Communicator1.ColorDisposeOff();
+                        }
+                        if (disposevalue == true){
+                            Communicator1.ColorDisposeOn();
+                        }
+                        Communicator1.output.write(yellowcount);
+                        Communicator1.output.write(redcount);
+                        Communicator1.output.write(greencount);
+                        Communicator1.output.write(bluecount);
+                        //Communicator1.output.write(quantitycount);
+                        
                         Logboek.addRule(System.currentTimeMillis(), "Quantities successfully sent to Arduino2");
                     } catch (Exception e) {
                         Logboek.addRule(System.currentTimeMillis(), "ERROR: No connection with Arduino2!");
@@ -414,5 +469,37 @@ public class GUInew extends Application {
             pane.setContent(vbox);
             alert.show();
         }
+    }
+
+    private static void setGeelBak(int geelBak) {
+        Communicator2.geelBak = geelBak;
+    }
+
+    private static void setRoodBak(int roodBak) {
+        Communicator2.roodBak = roodBak;
+    }
+
+    private static void setGroenBak(int groenBak) {
+        Communicator2.groenBak = groenBak;
+    }
+
+    private static void setBlauwBak(int blauwBak) {
+        Communicator2.blauwBak = blauwBak;
+    }
+
+    public static void setBlauwcount(int blauwcount) {
+        Communicator1.blauwcount = blauwcount;
+    }
+
+    public static void setGeelcount(int geelcount) {
+        Communicator1.geelcount = geelcount;
+    }
+
+    public static void setGroencount(int groencount) {
+        Communicator1.groencount = groencount;
+    }
+
+    public static void setRoodcount(int roodcount) {
+        Communicator1.roodcount = roodcount;
     }
 }

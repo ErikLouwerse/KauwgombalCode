@@ -67,37 +67,29 @@ public class Database {
         try (Statement stmt = con.createStatement();
                 ResultSet rs = stmt.executeQuery(query)) {
             rs.next();
+            setGeelcount(rs.getInt("Aantal"));
             setGeelBak(rs.getInt("Aantal"));
             rs.next();
+            setRoodcount(rs.getInt("Aantal"));
             setRoodBak(rs.getInt("Aantal"));
             rs.next();
+            setGroencount(rs.getInt("Aantal"));
             setGroenBak(rs.getInt("Aantal"));
             rs.next();
+            setBlauwcount(rs.getInt("Aantal"));
             setBlauwBak(rs.getInt("Aantal"));
-
         } catch (Exception e) {
 
         }
 
     }
 
-    static void UpdateQuery(String kleur) {
+    static void UpdateQuery(String query) {
         Connection con = getConnection();
         try {
-        if (kleur.equals("geel")) {
-            PreparedStatement s = con.prepareStatement("Update aantal_ballen set Aantal = Aantal+1 where Naam = 'Geel'");
+            PreparedStatement s = con.prepareStatement(query);
             s.executeUpdate();
-        } else if (kleur.equals("rood")) {
-            PreparedStatement s = con.prepareStatement("Update aantal_ballen set Aantal = Aantal+1 where Naam = 'Rood'");
-            s.executeUpdate();
-        } else if (kleur.equals("groen")) {
-            PreparedStatement s = con.prepareStatement("Update aantal_ballen set Aantal = Aantal+1 where Naam = 'Groen'");
-            s.executeUpdate();
-        } else if (kleur.equals("blauw")) {
-            PreparedStatement s = con.prepareStatement("Update aantal_ballen set Aantal = Aantal+1 where Naam = 'Blauw'");
-            s.executeUpdate();
-        }
-        } catch (SQLException e){
+        } catch (SQLException e) {
             System.out.println(e);
         }
     }
@@ -149,5 +141,21 @@ public class Database {
 
     private static void setBlauwBak(int blauwBak) {
         Communicator2.blauwBak = blauwBak;
+    }
+
+    public static void setBlauwcount(int blauwcount) {
+        Communicator1.blauwcount = blauwcount;
+    }
+
+    public static void setGeelcount(int geelcount) {
+        Communicator1.geelcount = geelcount;
+    }
+
+    public static void setGroencount(int groencount) {
+        Communicator1.groencount = groencount;
+    }
+
+    public static void setRoodcount(int roodcount) {
+        Communicator1.roodcount = roodcount;
     }
 }

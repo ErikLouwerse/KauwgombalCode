@@ -29,11 +29,12 @@ public class Communicator1 implements SerialPortEventListener {
     static int baan2 = 225;
     static int baan3 = 275;
     static boolean animatie = false;
-    
+    static boolean connection = false;
+
     SerialPort serialPort;
 
     //The port we're going to use.
-    private String PORT_NAME[] = {"COM5"};
+    private String PORT_NAME[] = {"COM3"};
 
     //A BufferedReader which will be fed by a InputStreamReader converting the bytes into characters
     BufferedReader input;
@@ -84,6 +85,7 @@ public class Communicator1 implements SerialPortEventListener {
         } catch (Exception e) {
             System.out.println("ERROR: Could not initialize serialport or input/output streams!");
         }
+        Database.Query("SELECT * FROM `aantal_ballen`");
     }
 
     static void drawMachine() {
@@ -168,8 +170,20 @@ public class Communicator1 implements SerialPortEventListener {
             try {
                 String inputLine = input.readLine();
                 Logboek.addRule(System.currentTimeMillis(), "(Arduino1): " + inputLine);
+                if (inputLine.equals("200")) {
+                    connection = true;
+//                    try {
+//                        output.write(geelcount + 100);
+//                        output.write(roodcount + 100);
+//                        output.write(groencount + 100);
+//                        output.write(blauwcount + 100);
+//                    } catch (IOException ex) {
+//                    }
+                }
                 if (inputLine.equals("geel")) {
-                    Communicator2.output.write(204);
+                    if (Communicator2.connection == true) {
+                        Communicator2.output.write(204);
+                    }
                     animatie = true;
                     baan1 = 400;
                     baan2 = 70;
@@ -199,14 +213,20 @@ public class Communicator1 implements SerialPortEventListener {
                         GUInew.gc.strokeLine(220, 275, 400, 120);
                         drawMachine();
                     }
-                    Database.UpdateQuery("geel");
+                    Database.UpdateQuery("Update aantal_ballen set Aantal = Aantal+1 where Naam = 'Geel'");
                     geelcount++;
                     Communicator2.geelBak++;
                     r = 200;
+                    GUInew.gc.clearRect(0, 0, 5000, 5000);
+                    drawMachine();
+                    GUInew.gc.strokeLine(220, 225, 400, 70);
+                    GUInew.gc.strokeLine(220, 275, 400, 120);
                     animatie = false;
                 }
                 if (inputLine.equals("rood")) {
-                    Communicator2.output.write(205);
+                    if (Communicator2.connection == true) {
+                        Communicator2.output.write(205);
+                    }
                     animatie = true;
                     baan1 = 425;
                     baan2 = 145;
@@ -236,14 +256,20 @@ public class Communicator1 implements SerialPortEventListener {
                         GUInew.gc.strokeLine(220, 275, 425, 195);
                         drawMachine();
                     }
-                    Database.UpdateQuery("rood");
+                    Database.UpdateQuery("Update aantal_ballen set Aantal = Aantal+1 where Naam = 'Rood'");
                     roodcount++;
                     Communicator2.roodBak++;
                     r = 200;
+                    GUInew.gc.clearRect(0, 0, 5000, 5000);
+                    GUInew.gc.strokeLine(220, 225, 425, 145);
+                    GUInew.gc.strokeLine(220, 275, 425, 195);
+                    drawMachine();
                     animatie = false;
                 }
                 if (inputLine.equals("groen")) {
-                    Communicator2.output.write(206);
+                    if (Communicator2.connection == true) {
+                        Communicator2.output.write(206);
+                    }
                     animatie = true;
                     baan1 = 450;
                     baan2 = 225;
@@ -260,13 +286,19 @@ public class Communicator1 implements SerialPortEventListener {
                         GUInew.gc.strokeLine(220, 275, 450, 275);
                         drawMachine();
                     }
-                    Database.UpdateQuery("groen");
+                    Database.UpdateQuery("Update aantal_ballen set Aantal = Aantal+1 where Naam = 'Groen'");
                     groencount++;
                     Communicator2.groenBak++;
+                    GUInew.gc.clearRect(0, 0, 5000, 5000);
+                    GUInew.gc.strokeLine(220, 225, 450, 225);
+                    GUInew.gc.strokeLine(220, 275, 450, 275);
+                    drawMachine();
                     animatie = false;
                 }
                 if (inputLine.equals("blauw")) {
-                    Communicator2.output.write(207);
+                    if (Communicator2.connection == true) {
+                        Communicator2.output.write(207);
+                    }
                     animatie = true;
                     baan1 = 425;
                     baan2 = 305;
@@ -297,9 +329,50 @@ public class Communicator1 implements SerialPortEventListener {
                         drawMachine();
                     }
                     r = 200;
-                    Database.UpdateQuery("blauw");
+                    Database.UpdateQuery("Update aantal_ballen set Aantal = Aantal+1 where Naam = 'Blauw'");
                     Communicator2.blauwBak++;
                     blauwcount++;
+                    GUInew.gc.clearRect(0, 0, 5000, 5000);
+                    GUInew.gc.strokeLine(220, 225, 425, 305);
+                    GUInew.gc.strokeLine(220, 275, 425, 355);
+                    drawMachine();
+                    animatie = false;
+                }
+                if (inputLine.equals("rest")) {
+                    animatie = true;
+                    baan1 = 400;
+                    baan2 = 385;
+                    baan3 = 435;
+                    for (int i = 0; i < 200; i = i + 4) {
+                        GUInew.gc.clearRect(0, 0, 5000, 5000);
+                        GUInew.gc.setFill(Color.BLACK);
+                        GUInew.gc.fillOval(i, 232, 36, 36);
+                        if (Communicator2.animatie == true) {
+                            GUInew.gc.setFill(Communicator2.kleur);
+                            GUInew.gc.fillOval(Communicator2.bal1, Communicator2.bal2, 36, 36);
+                        }
+                        GUInew.gc.strokeLine(220, 225, 400, 385);
+                        GUInew.gc.strokeLine(220, 275, 400, 435);
+                        drawMachine();
+                    }
+                    for (double i = 0; i < 160; i = i + 3.3) {
+                        r = r + 4;
+                        GUInew.gc.clearRect(0, 0, 5000, 5000);
+                        GUInew.gc.setFill(Color.BLACK);
+                        GUInew.gc.fillOval(r + 4, 232 + i, 36, 36);
+                        if (Communicator2.animatie == true) {
+                            GUInew.gc.setFill(Communicator2.kleur);
+                            GUInew.gc.fillOval(Communicator2.bal1, Communicator2.bal2, 36, 36);
+                        }
+                        GUInew.gc.strokeLine(220, 225, 400, 385);
+                        GUInew.gc.strokeLine(220, 275, 400, 435);
+                        drawMachine();
+                    }
+                    r = 200;
+                    GUInew.gc.clearRect(0, 0, 5000, 5000);
+                    GUInew.gc.strokeLine(220, 225, 400, 385);
+                    GUInew.gc.strokeLine(220, 275, 400, 435);
+                    drawMachine();
                     animatie = false;
                 }
             } catch (Exception e) {
@@ -309,7 +382,7 @@ public class Communicator1 implements SerialPortEventListener {
 
     void ColorDisposeOn() {
         try {
-            output.write(3);
+            output.write(203);
         } catch (IOException e) {
             Logboek.addRule(System.currentTimeMillis(), "ERROR: could not send input to Arduino1!");
         }
@@ -317,7 +390,7 @@ public class Communicator1 implements SerialPortEventListener {
 
     void ColorDisposeOff() {
         try {
-            output.write(4);
+            output.write(202);
         } catch (IOException e) {
             Logboek.addRule(System.currentTimeMillis(), "ERROR: could not send input to Arduino1!");
         }
