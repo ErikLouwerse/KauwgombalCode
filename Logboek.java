@@ -16,9 +16,13 @@ public class Logboek {
     static void addRule(long time, String text) {
         String addme = "[" + convertTime(time) + "]  " + text + "\n";
         logrules.add(addme);
-        GUInew.getLogarea().appendText(addme);
+        if (GUInew.getLogarea() != null) {
+            GUInew.getLogarea().appendText(addme);
+        }
         try {
-            Database.PrepQueryLogbook(time, text);
+            if (Database.getConnection() != null) {
+                Database.PrepQueryLogbook(time, text);
+            }
         } catch (Exception e) {
             GUInew.getLogarea().appendText("ERROR: Database error, program can't function.\n");
         }
