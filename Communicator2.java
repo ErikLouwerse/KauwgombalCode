@@ -9,6 +9,8 @@ import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 import java.io.IOException;
 import java.util.Enumeration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.scene.paint.Color;
 
 public class Communicator2 implements SerialPortEventListener {
@@ -65,7 +67,7 @@ public class Communicator2 implements SerialPortEventListener {
         }
 
         if (portId == null) {
-            Logboek.addRule(System.currentTimeMillis(), "ERROR: Could not find COM port for Arduino2!");
+            System.out.println("ERROR: COM poort van Arduino 2 niet gevonden!");
             return;
         }
 
@@ -84,8 +86,7 @@ public class Communicator2 implements SerialPortEventListener {
             serialPort.addEventListener(this);
             serialPort.notifyOnDataAvailable(true);
         } catch (Exception e) {
-            Logboek.addRule(System.currentTimeMillis(), "ERROR: Could not initialize serialport or input/output streams for Arduino2!");
-            GUInew.showError("Error with Arduino2", "Could not initialize serialport or input/output streams. Please try again.");
+            Logboek.addRule(System.currentTimeMillis(), "ERROR: niet gelukt om serialport of input/output streams te initializeren!");
         }
     }
 
@@ -95,44 +96,36 @@ public class Communicator2 implements SerialPortEventListener {
         if (oEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
             try {
                 String inputLine = input.readLine();
+                Logboek.addRule(System.currentTimeMillis(), "(Arduino2): " + inputLine);
                 if (inputLine.equals("201")) {
-                    Logboek.addRule(System.currentTimeMillis(), "Succesfully connected to Arduino 2");
                     connection = true;
-                    try {
-                        output.write(Communicator1.geelcount + 100);
-                        output.write(Communicator1.roodcount + 100);
-                        output.write(Communicator1.groencount + 100);
-                        output.write(Communicator1.blauwcount + 100);
-                        output.write(254);
-                    } catch (IOException ex) {
-                    }
+                    output.write(Communicator1.geelcount + 100);
+                    output.write(Communicator1.roodcount + 100);
+                    output.write(Communicator1.groencount + 100);
+                    output.write(Communicator1.blauwcount + 100);
                 }
-                else if (inputLine.equals("213")) {
-                    Logboek.addRule(System.currentTimeMillis(), "Pakketje kan (nog) niet gemaakt worden");
-                }
-                else if (inputLine.equals("215")) {
-                    Logboek.addRule(System.currentTimeMillis(), "Machine 2 is dropping a yellow ball");
+                if (inputLine.equals("Dropping yellow ball")) {
                     kleur = Color.YELLOW;
                     animatie = true;
                     Communicator1.geelcount = Communicator1.geelcount - 1;
                     for (int i = 0; i < 392; i = i + 4) {
-                        if (!Communicator1.animatie) {
+                        if (Communicator1.animatie == false) {
                             GUInew.gc.clearRect(0, 0, 5000, 5000);
                             GUInew.gc.setFill(Color.YELLOW);
                         }
                         if (i <= 292) {
-                            if (!Communicator1.animatie) {
+                            if (Communicator1.animatie == false) {
                                 GUInew.gc.fillOval(480 + i, 72 + i / 2.5, 36, 36);
                             }
                             bal1 = 480 + i;
                             bal2 = 72 + i / 2.5;
                         } else if (i > 292) {
-                            if (!Communicator1.animatie) {
+                            if (Communicator1.animatie == false) {
                                 GUInew.gc.fillOval(480 + i, 188.8, 36, 36);
                             }
                             bal1 = 480 + i;
                         }
-                        if (!Communicator1.animatie) {
+                        if (Communicator1.animatie == false) {
                             drawSetup();
                         } else {
                             try {
@@ -146,29 +139,28 @@ public class Communicator2 implements SerialPortEventListener {
                     drawSetup();
                     animatie = false;
                 }
-                else if (inputLine.equals("216")) {
-                    Logboek.addRule(System.currentTimeMillis(), "Machine 2 is dropping a red ball");
+                if (inputLine.equals("Dropping red ball")) {
                     kleur = Color.RED;
                     animatie = true;
                     Communicator1.roodcount = Communicator1.roodcount - 1;
                     for (int i = 0; i < 392; i = i + 4) {
-                        if (!Communicator1.animatie) {
+                        if (Communicator1.animatie == false) {
                             GUInew.gc.clearRect(0, 0, 5000, 5000);
                             GUInew.gc.setFill(Color.RED);
                         }
                         if (i <= 292) {
-                            if (!Communicator1.animatie) {
+                            if (Communicator1.animatie == false) {
                                 GUInew.gc.fillOval(505 + i, 152 + i / 7.5, 36, 36);
                             }
                             bal1 = 505 + i;
                             bal2 = 152 + i / 7.5;
                         } else if (i > 292) {
-                            if (!Communicator1.animatie) {
+                            if (Communicator1.animatie == false) {
                                 GUInew.gc.fillOval(505 + i, 190.93, 36, 36);
                             }
                             bal1 = 505 + i;
                         }
-                        if (!Communicator1.animatie) {
+                        if (Communicator1.animatie == false) {
                             drawSetup();
                         } else {
                             try {
@@ -182,29 +174,28 @@ public class Communicator2 implements SerialPortEventListener {
                     drawSetup();
                     animatie = false;
                 }
-                else if (inputLine.equals("217")) {
-                    Logboek.addRule(System.currentTimeMillis(), "Machine 2 is dropping a green ball");
+                if (inputLine.equals("Dropping green ball")) {
                     kleur = Color.GREEN;
                     animatie = true;
                     Communicator1.groencount = Communicator1.groencount - 1;
                     for (int i = 0; i < 352; i = i + 4) {
-                        if (!Communicator1.animatie) {
+                        if (Communicator1.animatie == false) {
                             GUInew.gc.clearRect(0, 0, 5000, 5000);
                             GUInew.gc.setFill(Color.GREEN);
                         }
                         if (i <= 268) {
-                            if (!Communicator1.animatie) {
+                            if (Communicator1.animatie == false) {
                                 GUInew.gc.fillOval(530 + i, 232 - i / 6.5, 36, 36);
                             }
                             bal1 = 530 + i;
                             bal2 = 232 - i / 6.5;
                         } else if (i > 268) {
-                            if (!Communicator1.animatie) {
+                            if (Communicator1.animatie == false) {
                                 GUInew.gc.fillOval(530 + i, 190.77, 36, 36);
                             }
                             bal1 = 530 + i;
                         }
-                        if (!Communicator1.animatie) {
+                        if (Communicator1.animatie == false) {
                             drawSetup();
                         } else {
                             try {
@@ -219,29 +210,28 @@ public class Communicator2 implements SerialPortEventListener {
                     drawSetup();
                     animatie = false;
                 }
-                else if (inputLine.equals("218")) {
-                    Logboek.addRule(System.currentTimeMillis(), "Machine 2 is dropping a blue ball");
+                if (inputLine.equals("Dropping blue ball")) {
                     kleur = Color.BLUE;
                     animatie = true;
                     Communicator1.blauwcount = Communicator1.blauwcount - 1;
                     for (int i = 0; i < 392; i = i + 4) {
-                        if (!Communicator1.animatie) {
+                        if (Communicator1.animatie == false) {
                             GUInew.gc.clearRect(0, 0, 5000, 5000);
                             GUInew.gc.setFill(Color.BLUE);
                         }
                         if (i <= 292) {
-                            if (!Communicator1.animatie) {
+                            if (Communicator1.animatie == false) {
                                 GUInew.gc.fillOval(505 + i, 295 - i / 2.8, 36, 36);
                             }
                             bal1 = 505 + i;
                             bal2 = 295 - i / 2.8;
                         } else if (i > 292) {
-                            if (!Communicator1.animatie) {
+                            if (Communicator1.animatie == false) {
                                 GUInew.gc.fillOval(505 + i, 190.71, 36, 36);
                             }
                             bal1 = 505 + i;
                         }
-                        if (!Communicator1.animatie) {
+                        if (Communicator1.animatie == false) {
                             drawSetup();
                         } else {
                             try {
@@ -255,8 +245,7 @@ public class Communicator2 implements SerialPortEventListener {
                     drawSetup();
                     animatie = false;
                 }
-                else if (inputLine.equals("219")) {
-                    Logboek.addRule(System.currentTimeMillis(), "Er is een pakketje klaar");
+                if (inputLine.equals("Pakje klaar!")) {
                     Communicator1.pakjes = Communicator1.pakjes + 1;
                     Communicator1.bakgroencount = 0;
                     Communicator1.bakgeelcount = 0;
@@ -265,67 +254,64 @@ public class Communicator2 implements SerialPortEventListener {
                     GUInew.gc.clearRect(0, 0, 5000, 5000);
                     drawSetup();
                 }
-                else if (inputLine.equals("220")) {
-                    Logboek.addRule(System.currentTimeMillis(), "De bestelling is afgehandeld");
+                if (inputLine.equals("Bestelling is klaar!")) {
                     Communicator1.pakjes = 0;
                     GUInew.gc.clearRect(0, 0, 5000, 5000);
                     drawSetup();
-                }
-                else if(inputLine.equals("242")) {
-                    Logboek.addRule(System.currentTimeMillis(), "Machine 2 started successfully");
-                }
-                else if(inputLine.equals("243")) {
-                    Logboek.addRule(System.currentTimeMillis(), "Machine 2 stopped successfully");
-                }
-                else {
-                    Logboek.addRule(System.currentTimeMillis(), "(Arduino2): " + inputLine);
-                    /*try {
+                } else {
+                    try {
                         Thread.sleep(20);
                     } catch (InterruptedException ex) {
-                    }*/
+                    }
                 }
+
             } catch (Exception e) {
             }
         }
     }
 
-    void YellowBalls(int t) {
+    void YellowBalls(int t
+    ) {
         try {
             output.write(t);
         } catch (IOException e) {
-            Logboek.addRule(System.currentTimeMillis(), "ERROR: could not send input to Arduino2!");
+            Logboek.addRule(System.currentTimeMillis(), "ERROR: niet gelukt om input naar Arduino2 te sturen!!");
         }
     }
 
-    void RedBalls(int t) {
+    void RedBalls(int t
+    ) {
         try {
             output.write(t);
         } catch (IOException e) {
-            Logboek.addRule(System.currentTimeMillis(), "ERROR: could not send input to Arduino2!");
+            Logboek.addRule(System.currentTimeMillis(), "ERROR: niet gelukt om input naar Arduino2 te sturen!");
         }
     }
 
-    void GreenBalls(int t) {
+    void GreenBalls(int t
+    ) {
         try {
             output.write(t);
         } catch (IOException e) {
-            Logboek.addRule(System.currentTimeMillis(), "ERROR: could not send input to Arduino2!");
+            Logboek.addRule(System.currentTimeMillis(), "ERROR: niet gelukt om input naar Arduino2 te sturen!");
         }
     }
 
-    void BlueBalls(int t) {
+    void BlueBalls(int t
+    ) {
         try {
             output.write(t);
         } catch (IOException e) {
-            Logboek.addRule(System.currentTimeMillis(), "ERROR: could not send input to Arduino2!");
+            Logboek.addRule(System.currentTimeMillis(), "ERROR: niet gelukt om input naar Arduino2 te sturen!");
         }
     }
 
-    void QuantityPackage(int i) {
+    void QuantityPackage(int i
+    ) {
         try {
             output.write(i);
         } catch (IOException e) {
-            Logboek.addRule(System.currentTimeMillis(), "ERROR: could not send input to Arduino2!");
+            Logboek.addRule(System.currentTimeMillis(), "ERROR: niet gelukt om input naar Arduino2 te sturen!");
         }
     }
 }

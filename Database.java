@@ -24,7 +24,7 @@ public class Database {
         try {
             con = DriverManager.getConnection("jdbc:mysql://" + host + ":3306/" + dbname + "?useSSL=false", username, password);
         } catch (Exception e) {
-            System.out.println("ERROR: niet gelukt om te verbinden met de Database!");
+            System.out.println("Error: niet gelukt om te connecten met Database!");
         }
         return con;
     }
@@ -78,12 +78,15 @@ public class Database {
             setBlauwcount(rs.getInt("Aantal"));
             setBlauwBak(rs.getInt("Aantal"));
         } catch (Exception e) {
+
         }
+
     }
 
     static void UpdateQuery(String query) {
         Connection con = getConnection();
-        try (PreparedStatement s = con.prepareStatement(query)){
+        try {
+            PreparedStatement s = con.prepareStatement(query);
             s.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e);

@@ -1,6 +1,7 @@
 package javaarduino;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
@@ -21,16 +22,18 @@ import javafx.scene.shape.LineBuilder;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class GUInew extends Application {
 
     static GraphicsContext gc;
+
     static boolean stop;
     private static Communicator1 Communicator1;
     private static Communicator2 Communicator2;
@@ -40,9 +43,11 @@ public class GUInew extends Application {
             statuslabel, loglabel;
     private TextField yellowballfield, redballfield, greenballfield, blueballfield, packagesfield;
     private static TextArea logarea;
+    private Line blackLine;
     private CheckBox dispose;
-    private Button savebutton, prevsettingsbutton, logbtn, startbtn, stopbtn, resetbtn;
+    private Button savebutton, prevsettingsbutton, logbtn, startmachinebtn, startorderbtn, stopbtn, resetbtn;
     private GUIbuttonListener listener;
+    private int yellowcount = -1, redcount = -1, greencount = -1, bluecount = -1, quantitycount = -1;
 
     public static void main(String[] args) {
         Communicator1 = new Communicator1();
@@ -79,14 +84,12 @@ public class GUInew extends Application {
         settingstext = new Label("Instellingen");
         settingstext.setFont(Font.font(Font.getDefault().getFamily(), FontWeight.BOLD, 18));
 
-        Line blackLine = LineBuilder.create().startX(0).startY(0).endX(0)
+        blackLine = LineBuilder.create().startX(0).startY(0).endX(0)
                 .endY(0).fill(Color.BLACK).strokeWidth(2.0f).translateY(-10).build();
         blackLine.endXProperty().bind(window.widthProperty().multiply(0.175));
 
-        dispose = new CheckBox("Onnodige ballen in restbak deponeren");
+        dispose = new CheckBox("Onnodige ballen apart leggen");
         dispose.setOnAction(listener);
-        dispose.setTooltip(new Tooltip("Deponeer ballen die niet nodig zijn voor de bestelling in de restbak. " +
-                "Zo worden alleen de nodige ballen voor de bestelling gesorteerd."));
 
         yellowballlabel = new Label("Aantal gele ballen:");
         redballlabel = new Label("Aantal rode ballen:");
@@ -135,6 +138,8 @@ public class GUInew extends Application {
         //=============================== START RIGHT ==================================
         vboxright = new VBox(10);
         vboxright.setPadding(new Insets(0));
+        //vboxright.prefHeightProperty().bind(window.heightProperty().multiply(1.00));
+        //vboxright.prefWidthProperty().bind(window.widthProperty().multiply(1.00));
 
         statuslabel = new Label("Huidige status:");
 
@@ -143,8 +148,6 @@ public class GUInew extends Application {
         holder.getChildren().add(canvas);
         holder.setStyle("-fx-background-color: white");
         gc = canvas.getGraphicsContext2D();
-        drawSetup();
-
         loglabel = new Label("Logboek:");
 
         logarea = new TextArea("");
@@ -154,24 +157,29 @@ public class GUInew extends Application {
         logbtn.setText("Toon logboek");
         logbtn.setOnAction(listener);
 
-        startbtn = new Button();
-        startbtn.setText("  Start  ");
-        startbtn.setOnAction(listener);
+        startmachinebtn = new Button();
+        startmachinebtn.setText("  Start machines  ");
+        startmachinebtn.setOnAction(listener);
+
+        startorderbtn = new Button();
+        startorderbtn.setText("  Start bestelling  ");
+        startorderbtn.setDisable(true);
+        startorderbtn.setOnAction(listener);
 
         resetbtn = new Button();
-        resetbtn.setText("Reset ballen");
+        resetbtn.setText("  Reset Ballen  ");
         resetbtn.setOnAction(listener);
 
         stopbtn = new Button();
-        stopbtn.setText("  Stop  ");
-        stopbtn.setOnAction(listener);
+        stopbtn.setText("  Stop machine 2  ");
         stopbtn.setDisable(true);
+        stopbtn.setOnAction(listener);
 
         BorderPane controlbuttons = new BorderPane();
         HBox startstopbuttons = new HBox();
         startstopbuttons.setSpacing(15);
         startstopbuttons.setAlignment(Pos.BOTTOM_RIGHT);
-        startstopbuttons.getChildren().addAll(startbtn, resetbtn, stopbtn);
+        startstopbuttons.getChildren().addAll(startmachinebtn, startorderbtn, resetbtn, stopbtn);
         HBox logbookbutton = new HBox();
         logbookbutton.setAlignment(Pos.BOTTOM_LEFT);
         logbookbutton.getChildren().addAll(logbtn);
@@ -187,6 +195,8 @@ public class GUInew extends Application {
         window.setTitle("Kauwgomballen HMI");
         window.setMaximized(true);
         window.show();
+        Database.Query("SELECT * FROM `aantal_ballen`");
+        drawSetup();
     }
 
     @Override
@@ -195,7 +205,7 @@ public class GUInew extends Application {
             try {
                 Database.getConnection().close();
             } catch (SQLException e) {
-                System.out.println("Error while closing Database connection, connection probably not closed");
+                System.out.println("Error met sluiten van database connectie");
             }
         }
         try {
@@ -218,7 +228,7 @@ public class GUInew extends Application {
                 Communicator2.serialPort.close();
             }
         } catch (IOException e) {
-            System.out.println("ERROR while closing Communicators!");
+            System.out.println("ERROR met sluiten van communicators");
         }
     }
 
@@ -262,50 +272,95 @@ public class GUInew extends Application {
         @Override
         public void handle(ActionEvent event) {
             if (event.getSource() == savebutton) {
-                Logboek.addRule(System.currentTimeMillis(), "Saving settings...");
+                Logboek.addRule(System.currentTimeMillis(), "Settings aan het opslaan...");
                 saveSettings();
             } else if (event.getSource() == prevsettingsbutton) {
-                Logboek.addRule(System.currentTimeMillis(), "Reverting previous settings...");
+                Logboek.addRule(System.currentTimeMillis(), "Vorige instellingen aan het terug zetten...");
                 revertSettings();
-                Logboek.addRule(System.currentTimeMillis(), "Previous settings reverted");
-                showInfo("Instellingen teruggezet", "De vorige instellingen zijn teruggezet. Vergeet niet om nog op Opslaan te klikken!");
-            } else if (event.getSource() == startbtn) {
-                startbtn.setDisable(true);
-                Logboek.addRule(System.currentTimeMillis(), "Starting process");
-                if (!Communicator1.connection) {
-                    Communicator1.initialize();
+                Logboek.addRule(System.currentTimeMillis(), "Vorige instellingen zijn terug gezet!");
+                showInfo("Instellingen teruggezet", "De vorige instellingen zijn teruggezet. Vergeet niet om nog op Save te klikken!");
+            } else if (event.getSource() == startmachinebtn) {
+                if (Communicator1.connection == true && Communicator2.connection == true) {
+                    try {
+                        Communicator1.input.close();
+                        Communicator1.output.close();
+                        Communicator1.serialPort.close();
+                        Communicator2.input.close();
+                        Communicator2.output.close();
+                        Communicator2.serialPort.close();
+                    } catch (IOException ex) {
+                        Logger.getLogger(GUInew.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
-                if (!Communicator2.connection) {
-                    Communicator2.initialize();
-                }
+                Communicator1.initialize();
+                Communicator2.initialize();
                 stop = false;
+                stopbtn.setDisable(false);
+                startorderbtn.setDisable(false);
+                startmachinebtn.setDisable(true);
+                Logboek.addRule(System.currentTimeMillis(), "Start knop ingedrukt");
                 try {
                     Thread.sleep(2000);
-                    if (Communicator1.output != null) {
-                        Communicator1.output.write(200);
-                    }
-                    if (Communicator2.output != null) {
-                        Communicator2.output.write(201);
-                    }
-                } catch (IOException | InterruptedException ex) {
-                }
-                stopbtn.setDisable(false);
-            } else if (event.getSource() == stopbtn) {
-                stopbtn.setDisable(true);
-                Logboek.addRule(System.currentTimeMillis(), "Stopping process");
-                try {
-                    if (Communicator1.output != null) {
-                        Communicator1.output.write(255);
-                    }
-                    if (Communicator2.output != null) {
-                        Communicator2.output.write(255);
-                    }
+                    Communicator1.output.write(200);
+                    Communicator2.output.write(201);
                 } catch (IOException ex) {
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(GUInew.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                stop = true;
-                startbtn.setDisable(false);
+            } else if (event.getSource() == stopbtn) {
+                try {
+                    Communicator1.output.write(255);
+                    Communicator2.output.write(255);
+                    stop = true;
+                    stopbtn.setDisable(true);
+                    startmachinebtn.setDisable(false);
+                } catch (IOException ex) {
+                    Logger.getLogger(GUInew.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                Logboek.addRule(System.currentTimeMillis(), "Stop knop ingedrukt");
+            } else if (event.getSource() == startorderbtn) {
+                boolean disposevalue = dispose.isSelected();
+                if (yellowcount > -1 && redcount > -1 && greencount > -1 && bluecount > -1 && quantitycount > -1) {
+                    try {
+                        Logboek.addRule(System.currentTimeMillis(), "Sending quantities to Arduino2");
+                        Communicator2.YellowBalls(yellowcount);
+                        Communicator2.RedBalls(redcount);
+                        Communicator2.GreenBalls(greencount);
+                        Communicator2.BlueBalls(bluecount);
+                        Communicator2.QuantityPackage(quantitycount);
+                        if (disposevalue == false) {
+                            Communicator1.ColorDisposeOff();
+                        }
+                        if (disposevalue == true) {
+                            Communicator1.ColorDisposeOn();
+                        }
+                        Communicator1.output.write(yellowcount);
+                        Communicator1.output.write(redcount);
+                        Communicator1.output.write(greencount);
+                        Communicator1.output.write(bluecount);
+                        Communicator1.output.write(quantitycount);
+
+                        Logboek.addRule(System.currentTimeMillis(), "Waarden gestuurd naar Arduino2");
+                    } catch (Exception e) {
+                        Logboek.addRule(System.currentTimeMillis(), "ERROR: geen connectie met Arduino2!");
+                        showError("Fout tijdens opslaan", "De instellingen konden niet op de Arduino opgeslagen worden! Probeer het opnieuw.");
+                    }
+                    try {
+                        Logboek.addRule(System.currentTimeMillis(), "Settings opslaan in Database");
+                        Database.PrepQuery("INSERT INTO `transacties` (`Transactienummer`, `Geel`, `Rood`, `Groen`, `Blauw`, `Aantal pakketten`, `Afvoeren`, `Snelheid`) "
+                                + "SELECT MAX(Transactienummer)+1,?,?,?,?,?,?,? FROM transacties", yellowcount, redcount, greencount, bluecount, quantitycount, disposevalue);
+                        Logboek.addRule(System.currentTimeMillis(), "Settings successfully saved to Database");
+                        showInfo("Opgeslagen", "De instellingen zijn succesvol in de Database opgeslagen!");
+                    } catch (Exception e) {
+                        Logboek.addRule(System.currentTimeMillis(), "ERROR: niet gelukt om instellingen op te slaan in database!");
+                        showError("Fout tijdens opslaan", "De instellingen konden niet in de Database opgeslagen worden! Probeer het opnieuw.");
+                    }
+                } else {
+                    showError("Kan bestelling niet starten", "Niet gelukt om bestelling te starten, sla eerst een bestelling op");
+                }
+
             } else if (event.getSource() == resetbtn) {
-                Database.UpdateQuery("UPDATE aantal_ballen SET Aantal = 0");
+                Database.UpdateQuery("Update aantal_ballen set Aantal = 0");
                 setGeelcount(0);
                 setGeelBak(0);
                 setRoodcount(0);
@@ -314,14 +369,12 @@ public class GUInew extends Application {
                 setGroenBak(0);
                 setBlauwcount(0);
                 setBlauwBak(0);
-                try {
-                    if (Communicator1.connection) {
-                        Communicator1.output.write(214);
-                    }
-                    if (Communicator2.connection) {
+                if (Communicator2.connection == true) {
+                    try {
                         Communicator2.output.write(214);
+                    } catch (IOException ex) {
+                        Logger.getLogger(GUInew.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                } catch (IOException e) {
                 }
             } else if (event.getSource() == logbtn) {
                 showLogbookDialog();
@@ -329,64 +382,23 @@ public class GUInew extends Application {
         }
 
         private void saveSettings() {
-            boolean disposevalue = dispose.isSelected();
-            int orderyellow = -1, orderred = -1, ordergreen = -1, orderblue = -1, orderquantity = -1;
             try {
-                orderyellow = Integer.parseInt(yellowballfield.getText());
-                orderred = Integer.parseInt(redballfield.getText());
-                ordergreen = Integer.parseInt(greenballfield.getText());
-                orderblue = Integer.parseInt(blueballfield.getText());
-                orderquantity = Integer.parseInt(packagesfield.getText());
+                yellowcount = Integer.parseInt(yellowballfield.getText());
+                redcount = Integer.parseInt(redballfield.getText());
+                greencount = Integer.parseInt(greenballfield.getText());
+                bluecount = Integer.parseInt(blueballfield.getText());
+                quantitycount = Integer.parseInt(packagesfield.getText());
 
                 //Check if the input quantities meet the requirements: minimal 0 && maximal 99.
-                if (orderyellow < 0 || orderyellow > 99 || orderred < 0 || orderred > 99 || ordergreen < 0 || ordergreen > 99
-                        || orderblue < 0 || orderblue > 99 || orderquantity < 0 || orderquantity > 99) {
-                    Logboek.addRule(System.currentTimeMillis(), "WARNING: one or more of the values are invalid (<0 or >99)");
+                if (yellowcount < 0 || yellowcount > 99 || redcount < 0 || redcount > 99 || greencount < 0 || greencount > 99
+                        || bluecount < 0 || bluecount > 99 || quantitycount < 0 || quantitycount > 99) {
+                    Logboek.addRule(System.currentTimeMillis(), "WAARSCHUWING: een of meer van de ingevulde waarden zijn niet geldig (<0 or >99)");
                     showWarning("Er is een fout opgetreden!",
                             "Een of meerdere van de ingevulde hoeveelheden is kleiner dan 0 of groter dan 99. Verbeter dit.");
                 } else {
-                    try {
-                        Logboek.addRule(System.currentTimeMillis(), "Sending quantities to Arduino1");
-                        if (disposevalue) {
-                            Communicator1.ColorDisposeOn();
-                        } else {
-                            Communicator1.ColorDisposeOff();
-                        }
-                        Communicator1.YellowBalls(orderyellow);
-                        Communicator1.RedBalls(orderred);
-                        Communicator1.GreenBalls(ordergreen);
-                        Communicator1.BlueBalls(orderblue);
-                        Communicator1.QuantityPackage(orderquantity);
-                        Logboek.addRule(System.currentTimeMillis(), "Quantities successfully sent to Arduino1");
-                    } catch (Exception e) {
-                        Logboek.addRule(System.currentTimeMillis(), "ERROR: No connection with Arduino1!");
-                        showError("Fout tijdens opslaan", "De instellingen konden niet op Arduino 1 opgeslagen worden! Probeer het opnieuw.");
-                    }
-                    try {
-                        Logboek.addRule(System.currentTimeMillis(), "Sending quantities to Arduino2");
-                        Communicator2.YellowBalls(orderyellow);
-                        Communicator2.RedBalls(orderred);
-                        Communicator2.GreenBalls(ordergreen);
-                        Communicator2.BlueBalls(orderblue);
-                        Communicator2.QuantityPackage(orderquantity);
-                        Logboek.addRule(System.currentTimeMillis(), "Quantities successfully sent to Arduino2");
-                    } catch (Exception e) {
-                        Logboek.addRule(System.currentTimeMillis(), "ERROR: No connection with Arduino2!");
-                        showError("Fout tijdens opslaan", "De instellingen konden niet op Arduino 2 opgeslagen worden! Probeer het opnieuw.");
-                    }
-                    try {
-                        Logboek.addRule(System.currentTimeMillis(), "Saving settings to Database");
-                        Database.PrepQuery("INSERT INTO `transacties` (`Transactienummer`, `Geel`, `Rood`, `Groen`, `Blauw`, `Aantal pakketten`, `Afvoeren`) "
-                                + "SELECT MAX(Transactienummer)+1,?,?,?,?,?,? FROM transacties", orderyellow, orderred, ordergreen, orderblue, orderquantity, disposevalue);
-                        Logboek.addRule(System.currentTimeMillis(), "Settings successfully saved to Database");
-                        showInfo("Opgeslagen", "De instellingen zijn succesvol in de Database opgeslagen!");
-                    } catch (Exception e) {
-                        Logboek.addRule(System.currentTimeMillis(), "ERROR: Settings can't be saved to Database!");
-                        showError("Fout tijdens opslaan", "De instellingen konden niet in de Database opgeslagen worden! Probeer het opnieuw.");
-                    }
                 }
             } catch (NumberFormatException e) {
-                Logboek.addRule(System.currentTimeMillis(), "WARNING: Invalid input in one of the text fields");
+                Logboek.addRule(System.currentTimeMillis(), "WARNING: Ongeldige input in een van de tekst velden");
                 showWarning("Er is een fout opgetreden!",
                         "Een of meerdere van de instellingen was leeg of bevat niet-numerieke tekst. Verbeter dit.");
             }
