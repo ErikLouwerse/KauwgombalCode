@@ -24,7 +24,7 @@ public class Communicator2 implements SerialPortEventListener {
     static SerialPort serialPort;
 
     //The port we're going to use.
-    private String PORT_NAME[] = {"COM6"};
+    private String PORT_NAME[] = {"COM4"};
 
     //A BufferedReader which will be fed by a InputStreamReader converting the bytes into characters
     BufferedReader input;
@@ -279,10 +279,6 @@ public class Communicator2 implements SerialPortEventListener {
                 }
                 else {
                     Logboek.addRule(System.currentTimeMillis(), "(Arduino2): " + inputLine);
-                    /*try {
-                        Thread.sleep(20);
-                    } catch (InterruptedException ex) {
-                    }*/
                 }
             } catch (Exception e) {
             }

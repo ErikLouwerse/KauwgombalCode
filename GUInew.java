@@ -312,9 +312,11 @@ public class GUInew extends Application {
                 } catch (IOException ex) {
                 }
                 stop = true;
+                resetbtn.setDisable(false);
                 startmachinebtn.setDisable(false);
                 startorderbtn.setDisable(true);
             } else if (event.getSource() == startorderbtn) {
+                resetbtn.setDisable(true);
                 if (orderyellow > -1 && orderred > -1 && ordergreen > -1 && orderblue > -1 && orderquantity > -1) {
                     try {
                         Logboek.addRule(System.currentTimeMillis(), "Hoeveelheden naar Arduino 1 aan het sturen");

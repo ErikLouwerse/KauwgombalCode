@@ -32,7 +32,7 @@ public class Communicator1 implements SerialPortEventListener {
     SerialPort serialPort;
 
     //The port we're going to use.
-    private String PORT_NAME[] = {"COM4"};
+    private String PORT_NAME[] = {"COM9"};
 
     //A BufferedReader which will be fed by a InputStreamReader converting the bytes into characters
     BufferedReader input;
