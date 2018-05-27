@@ -24,7 +24,7 @@ public class Logboek {
                 Database.PrepQueryLogbook(time, text);
             }
         } catch (Exception e) {
-            GUInew.getLogarea().appendText("ERROR: Database error, program can't function.\n");
+            GUInew.getLogarea().appendText("ERROR: Database error, programma kan niet correct functioneren.\n");
         }
     }
 
