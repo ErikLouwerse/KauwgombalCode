@@ -31,26 +31,27 @@ public class Communicator1 implements SerialPortEventListener {
 
     SerialPort serialPort;
 
-    //The port we're going to use.
+    //Dit is de poort van de ardiuno
     private String PORT_NAME[] = {"COM9"};
 
-    //A BufferedReader which will be fed by a InputStreamReader converting the bytes into characters
+    //Dit leest de gegevens van de arduino
     BufferedReader input;
 
-    //The output stream to the port
+    //Dit stuurt gegevens naar de arduino
     OutputStream output;
 
-    //Milliseconds to block while waiting for port open
+    //Wachttijd voordat de COM poort geopened is
     private int TIME_OUT = 2000;
 
-    //Default bits per second for COM port.
+    //Serial.begin aantal van Arduino
     private int DATA_RATE = 9600;
 
+    //Starten met connectie maken
     void initialize() {
         CommPortIdentifier portId = null;
         Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();
 
-        //First, find an instance of serial port as set in PORT_NAME.
+        //Kijken of COM poort gevonden kan worden
         while (portEnum.hasMoreElements()) {
             CommPortIdentifier currPortId = (CommPortIdentifier) portEnum.nextElement();
             for (String portName : PORT_NAME) {
@@ -61,23 +62,24 @@ public class Communicator1 implements SerialPortEventListener {
             }
         }
 
+        //Error geven als COM poort niet gevonden is
         if (portId == null) {
             Logboek.addRule(System.currentTimeMillis(), "ERROR: Could not find COM port for Arduino1!");
             return;
         }
 
         try {
-            // open serial port, and use class name for the appName.
+            //serial port openen
             serialPort = (SerialPort) portId.open(this.getClass().getName(), TIME_OUT);
 
-            // set port parameters
+            //set port parameters
             serialPort.setSerialPortParams(DATA_RATE, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 
-            // open the streams
+            //open the streams
             input = new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
             output = serialPort.getOutputStream();
 
-            // add event listeners
+            //event listeners toevoegen
             serialPort.addEventListener(this);
             serialPort.notifyOnDataAvailable(true);
         } catch (Exception e) {
@@ -160,12 +162,14 @@ public class Communicator1 implements SerialPortEventListener {
         }
     }
 
-    //Handle an event on the serial port. Read the data and print it.
+    //Gegevens van Arduino uitlezen en er iets mee doen
     @Override
     public void serialEvent(SerialPortEvent oEvent) {
         if (oEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
             try {
                 String inputLine = input.readLine();
+                
+                //Succesvol connectie gemaakt
                 if (inputLine.equals("200")) {
                     Logboek.addRule(System.currentTimeMillis(), "Succesvol connectie gemaakt met machine 1");
                     connection = true;
@@ -178,19 +182,24 @@ public class Communicator1 implements SerialPortEventListener {
                     } catch (IOException ex) {
                     }
                 }
+                
+                //Gele bal gedetecteerd
                 else if (inputLine.equals("204")) {
-                    Logboek.addRule(System.currentTimeMillis(), "Machine 1 detected a yellow ball");
+                    Logboek.addRule(System.currentTimeMillis(), "Machine 1 heeft een gele kauwgombal gedetecteerd");
                     if (Communicator2.connection && Communicator2.output != null) {
                         Communicator2.output.write(209);
                     }
+                    //animatie wordt op true gezet zodat de tweede animatie weet dat deze animatie bezig is
                     animatie = true;
                     baan1 = 400;
                     baan2 = 70;
                     baan3 = 120;
+                    //animatie loop voor eerste stuk
                     for (int i = 0; i < 200; i = i + 4) {
                         GUInew.gc.clearRect(0, 0, 5000, 5000);
                         GUInew.gc.setFill(Color.YELLOW);
                         GUInew.gc.fillOval(i, 232, 36, 36);
+                        //als communicator 2 ook een animatie aan het doen is zal die gestopt worden, deze animatie wordt nu hier getekend
                         if (Communicator2.animatie) {
                             GUInew.gc.setFill(Communicator2.kleur);
                             GUInew.gc.fillOval(Communicator2.bal1, Communicator2.bal2, 36, 36);
@@ -199,11 +208,13 @@ public class Communicator1 implements SerialPortEventListener {
                         GUInew.gc.strokeLine(220, 275, 400, 120);
                         drawMachine();
                     }
+                    //animatie loop voor stuk over baan
                     for (double i = 0; i < 160; i = i + 3.3) {
                         r = r + 4;
                         GUInew.gc.clearRect(0, 0, 5000, 5000);
                         GUInew.gc.setFill(Color.YELLOW);
                         GUInew.gc.fillOval(r + 4, 232 - i, 36, 36);
+                        //als communicator 2 ook een animatie aan het doen is zal die gestopt worden, deze animatie wordt nu hier getekend
                         if (Communicator2.animatie) {
                             GUInew.gc.setFill(Communicator2.kleur);
                             GUInew.gc.fillOval(Communicator2.bal1, Communicator2.bal2, 36, 36);
@@ -212,6 +223,7 @@ public class Communicator1 implements SerialPortEventListener {
                         GUInew.gc.strokeLine(220, 275, 400, 120);
                         drawMachine();
                     }
+                    //aantal ballen van deze kleur gaat met 1 omhoog
                     Database.UpdateQuery("UPDATE aantal_ballen SET Aantal = Aantal+1 WHERE Naam = 'Geel'");
                     geelcount++;
                     Communicator2.geelBak++;
@@ -222,19 +234,23 @@ public class Communicator1 implements SerialPortEventListener {
                     GUInew.gc.strokeLine(220, 275, 400, 120);
                     animatie = false;
                 }
+                //Rode bal gedectecteerd
                 else if (inputLine.equals("205")) {
-                    Logboek.addRule(System.currentTimeMillis(), "Machine 1 detected a red ball");
+                    Logboek.addRule(System.currentTimeMillis(), "Machine 1 heeft een rode kauwgombal gedetecteerd");
                     if (Communicator2.connection && Communicator2.output != null) {
                         Communicator2.output.write(210);
                     }
+                    //animatie wordt op true gezet zodat de tweede animatie weet dat deze animatie bezig is
                     animatie = true;
                     baan1 = 425;
                     baan2 = 145;
                     baan3 = 195;
+                    //animatie loop voor eerste stuk
                     for (int i = 0; i < 200; i = i + 4) {
                         GUInew.gc.clearRect(0, 0, 5000, 5000);
                         GUInew.gc.setFill(Color.RED);
                         GUInew.gc.fillOval(i, 232, 36, 36);
+                        //als communicator 2 ook een animatie aan het doen is zal die gestopt worden, deze animatie wordt nu hier getekend
                         if (Communicator2.animatie) {
                             GUInew.gc.setFill(Communicator2.kleur);
                             GUInew.gc.fillOval(Communicator2.bal1, Communicator2.bal2, 36, 36);
@@ -243,11 +259,13 @@ public class Communicator1 implements SerialPortEventListener {
                         GUInew.gc.strokeLine(220, 275, 425, 195);
                         drawMachine();
                     }
+                    //animatie loop voor stuk over baan
                     for (double i = 0; i < 80; i = i + 1.5) {
                         r = r + 4;
                         GUInew.gc.clearRect(0, 0, 5000, 5000);
                         GUInew.gc.setFill(Color.RED);
                         GUInew.gc.fillOval(r + 4, 232 - i, 36, 36);
+                        //als communicator 2 ook een animatie aan het doen is zal die gestopt worden, deze animatie wordt nu hier getekend
                         if (Communicator2.animatie) {
                             GUInew.gc.setFill(Communicator2.kleur);
                             GUInew.gc.fillOval(Communicator2.bal1, Communicator2.bal2, 36, 36);
@@ -266,8 +284,9 @@ public class Communicator1 implements SerialPortEventListener {
                     drawMachine();
                     animatie = false;
                 }
+                //Groene bal gedectecteerd
                 else if (inputLine.equals("206")) {
-                    Logboek.addRule(System.currentTimeMillis(), "Machine 1 detected a green ball");
+                    Logboek.addRule(System.currentTimeMillis(), "Machine 1 heeft een groene bal gedetecteerd");
                     if (Communicator2.connection && Communicator2.output != null) {
                         Communicator2.output.write(211);
                     }
@@ -279,6 +298,7 @@ public class Communicator1 implements SerialPortEventListener {
                         GUInew.gc.clearRect(0, 0, 5000, 5000);
                         GUInew.gc.setFill(Color.GREEN);
                         GUInew.gc.fillOval(i, 232, 36, 36);
+                        //als communicator 2 ook een animatie aan het doen is zal die gestopt worden, deze animatie wordt nu hier getekend
                         if (Communicator2.animatie) {
                             GUInew.gc.setFill(Communicator2.kleur);
                             GUInew.gc.fillOval(Communicator2.bal1, Communicator2.bal2, 36, 36);
@@ -309,6 +329,7 @@ public class Communicator1 implements SerialPortEventListener {
                         GUInew.gc.clearRect(0, 0, 5000, 5000);
                         GUInew.gc.setFill(Color.BLUE);
                         GUInew.gc.fillOval(i, 232, 36, 36);
+                        //als communicator 2 ook een animatie aan het doen is zal die gestopt worden, deze animatie wordt nu hier getekend
                         if (Communicator2.animatie) {
                             GUInew.gc.setFill(Communicator2.kleur);
                             GUInew.gc.fillOval(Communicator2.bal1, Communicator2.bal2, 36, 36);
@@ -322,6 +343,7 @@ public class Communicator1 implements SerialPortEventListener {
                         GUInew.gc.clearRect(0, 0, 5000, 5000);
                         GUInew.gc.setFill(Color.BLUE);
                         GUInew.gc.fillOval(r + 4, 232 + i, 36, 36);
+                        //als communicator 2 ook een animatie aan het doen is zal die gestopt worden, deze animatie wordt nu hier getekend
                         if (Communicator2.animatie) {
                             GUInew.gc.setFill(Communicator2.kleur);
                             GUInew.gc.fillOval(Communicator2.bal1, Communicator2.bal2, 36, 36);
@@ -350,6 +372,7 @@ public class Communicator1 implements SerialPortEventListener {
                         GUInew.gc.clearRect(0, 0, 5000, 5000);
                         GUInew.gc.setFill(Color.BLACK);
                         GUInew.gc.fillOval(i, 232, 36, 36);
+                        //als communicator 2 ook een animatie aan het doen is zal die gestopt worden, deze animatie wordt nu hier getekend
                         if (Communicator2.animatie) {
                             GUInew.gc.setFill(Communicator2.kleur);
                             GUInew.gc.fillOval(Communicator2.bal1, Communicator2.bal2, 36, 36);
@@ -363,6 +386,7 @@ public class Communicator1 implements SerialPortEventListener {
                         GUInew.gc.clearRect(0, 0, 5000, 5000);
                         GUInew.gc.setFill(Color.BLACK);
                         GUInew.gc.fillOval(r + 4, 232 + i, 36, 36);
+                        //als communicator 2 ook een animatie aan het doen is zal die gestopt worden, deze animatie wordt nu hier getekend
                         if (Communicator2.animatie) {
                             GUInew.gc.setFill(Communicator2.kleur);
                             GUInew.gc.fillOval(Communicator2.bal1, Communicator2.bal2, 36, 36);

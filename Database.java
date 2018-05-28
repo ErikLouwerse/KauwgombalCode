@@ -13,6 +13,7 @@ public class Database {
     private static String username = "root";
     private static String password = "1424bb@12";
 
+    //Kijken of connectie al gemaakt is
     static Connection getConnection() {
         if (con != null) {
             return con;
@@ -20,15 +21,17 @@ public class Database {
         return getNewConnection();
     }
 
+    //Nieuwe connectie proberen te maken
     private static Connection getNewConnection() {
         try {
             con = DriverManager.getConnection("jdbc:mysql://" + host + ":3306/" + dbname + "?useSSL=false", username, password);
         } catch (Exception e) {
-            System.out.println("Error: niet gelukt om te connecten met Database!");
+            System.out.println("ERROR: niet gelukt om te verbinden met de Database!");
         }
         return con;
     }
 
+    //Query om de gegevens van de laatste bestelling op te halen
     static List<Integer> QueryPrevSettings() {
         List<Integer> values = new ArrayList<>();
         Connection con = getConnection();
@@ -50,6 +53,7 @@ public class Database {
         return values;
     }
 
+    //Query om iets in het logboek te zetten
     static void PrepQueryLogbook(long time, String text) {
         Connection con = getConnection();
         try (PreparedStatement s = con.prepareStatement("INSERT INTO logboek (Tijd, Activiteit) VALUES (?, ?)")) {
@@ -61,6 +65,7 @@ public class Database {
         }
     }
 
+    //Query om het aantal ballen in de machine op te halen van voordat de HMI gesloten was
     static void Query(String query) {
         Connection con = getConnection();
         try (Statement stmt = con.createStatement();
@@ -78,21 +83,20 @@ public class Database {
             setBlauwcount(rs.getInt("Aantal"));
             setBlauwBak(rs.getInt("Aantal"));
         } catch (Exception e) {
-
         }
-
     }
 
+    //Query voor update statement
     static void UpdateQuery(String query) {
         Connection con = getConnection();
-        try {
-            PreparedStatement s = con.prepareStatement(query);
+        try (PreparedStatement s = con.prepareStatement(query)){
             s.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e);
         }
     }
 
+    //Query voor een bestelling in de database stoppen
     static void PrepQuery(String query, int yellow, int red, int green, int blue, int quantity, boolean dispose) {
         Connection con = getConnection();
         try (PreparedStatement s = con.prepareStatement(query)) {
@@ -108,6 +112,7 @@ public class Database {
         }
     }
 
+    //Query voor het logboek ophalen
     static String QueryFullLogbook(int amount) {
         StringBuilder sb = new StringBuilder();
         Connection con = getConnection();
@@ -141,19 +146,19 @@ public class Database {
         Communicator2.blauwBak = blauwBak;
     }
 
-    public static void setBlauwcount(int blauwcount) {
+    static void setBlauwcount(int blauwcount) {
         Communicator1.blauwcount = blauwcount;
     }
 
-    public static void setGeelcount(int geelcount) {
+    static void setGeelcount(int geelcount) {
         Communicator1.geelcount = geelcount;
     }
 
-    public static void setGroencount(int groencount) {
+    static void setGroencount(int groencount) {
         Communicator1.groencount = groencount;
     }
 
-    public static void setRoodcount(int roodcount) {
+    static void setRoodcount(int roodcount) {
         Communicator1.roodcount = roodcount;
     }
 }

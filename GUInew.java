@@ -54,6 +54,7 @@ public class GUInew extends Application {
 
     @Override
     public void start(final Stage window) {
+        //Aantal ballen pakken uit database
         Database.Query("SELECT * FROM `aantal_ballen`");
         listener = new GUIbuttonListener();
         //=============== START Create root, left and right ================
@@ -116,7 +117,6 @@ public class GUInew extends Application {
         savebutton = new Button(" Opslaan ");
         savebutton.setFont(Font.font(null, FontWeight.BOLD, Font.getDefault().getSize()));
         savebutton.setOnAction(listener);
-        //savebutton.setStyle("-fx-background-color:#5aed5a;");
         prevsettingsbutton = new Button("Vorige instellingen");
         prevsettingsbutton.setOnAction(listener);
 
@@ -497,19 +497,19 @@ public class GUInew extends Application {
         Communicator2.blauwBak = blauwBak;
     }
 
-    public static void setBlauwcount(int blauwcount) {
+    private static void setBlauwcount(int blauwcount) {
         Communicator1.blauwcount = blauwcount;
     }
 
-    public static void setGeelcount(int geelcount) {
+    private static void setGeelcount(int geelcount) {
         Communicator1.geelcount = geelcount;
     }
 
-    public static void setGroencount(int groencount) {
+    private static void setGroencount(int groencount) {
         Communicator1.groencount = groencount;
     }
 
-    public static void setRoodcount(int roodcount) {
+    private static void setRoodcount(int roodcount) {
         Communicator1.roodcount = roodcount;
     }
 }

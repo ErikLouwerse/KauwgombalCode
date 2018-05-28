@@ -21,10 +21,10 @@ public class Communicator2 implements SerialPortEventListener {
 
     static boolean animatie = false;
 
-    static SerialPort serialPort;
+    SerialPort serialPort;
 
     //The port we're going to use.
-    private String PORT_NAME[] = {"COM4"};
+    private String PORT_NAME[] = {"COM7"};
 
     //A BufferedReader which will be fed by a InputStreamReader converting the bytes into characters
     BufferedReader input;
